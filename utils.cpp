@@ -430,9 +430,9 @@ unsigned int rmultinomial(const gsl_vector* v) {
   return i;
 }
 
-double rgamma(double a, double b) {
-  return gsl_ran_gamma_mt(RANDOM_NUMBER, a, b);
-}
+// double rgamma(double a, double b) {
+//   return gsl_ran_gamma_mt(RANDOM_NUMBER, a, b);
+// }
 
 double rbeta(double a, double b) {
   return gsl_ran_beta(RANDOM_NUMBER, a, b);
