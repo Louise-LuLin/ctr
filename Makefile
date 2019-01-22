@@ -4,8 +4,8 @@ CC = g++ -Wall
 # CFLAGS = -g -Wall
 LDFLAGS = -lgsl -lm -lgslcblas
 
-GSL_INCLUDE = /home/chongw/include
-GSL_LIB = /home/chongw/lib
+GSL_INCLUDE = /usr/local/include/
+GSL_LIB = /usr/local/lib/
 
 GSL_INCLUDE_MAC = /usr/local/include/
 GSL_LIB_MAC = /usr/local/lib/
