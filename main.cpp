@@ -192,8 +192,8 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < crossV; i++) {
     /// print information
     printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
-    vector <char*> test_path; 
-    char* test = NULL;
+    std::vector<std::string> test_path; 
+    std::string test = "";
 
     if (crossV == 1) {
       sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
     vector <c_corpus*> test_c;
     for (int j = 0; j < test_path.size(); j++) {
       c_corpus* tmp_c = new c_corpus();
-      tmp_c->read_data(test_path[j]);
+      tmp_c->read_data(test_path[j].c_str());
       test_c.push_back(tmp_c);
     }
 
