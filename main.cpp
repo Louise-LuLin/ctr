@@ -102,12 +102,12 @@ int main(int argc, char* argv[]) {
   string source="YelpNew";
   string cold="true";
 
-  string  directory = NULL;
-  string  user_path = NULL;
-  string  item_path = NULL;
-  string  mult_path = NULL;
-  string  theta_init_path = NULL;
-  string  beta_init_path = NULL;
+  string  directory = "";
+  string  user_path = "";
+  string  item_path = "";
+  string  mult_path = "";
+  string  theta_init_path = "";
+  string  beta_init_path = "";
 
   int i=0;
   while (i <= argc - 1) {
@@ -122,13 +122,13 @@ int main(int argc, char* argv[]) {
       fprintf(stdout, "+ cold = %s\n", cold.c_str());
     } else if (strcmp(argv[i], "-iter") == 0){
       max_iter = atoi(argv[++i]);
-      fprintf(stdout, "+ iter = %d\n", iter);
+      fprintf(stdout, "+ iter = %d\n", max_iter);
     } else if (strcmp(argv[i], "-crossV") == 0) {
       crossV = atoi(argv[++i]);
       fprintf(stdout, "+ crossV = %d\n", crossV);
     } else if (strcmp(argv[i], "-k") == 0) {
       num_factors = atoi(argv[++i]);
-      fprintf(stdout, "+ k = %d\n", K);
+      fprintf(stdout, "+ k = %d\n", num_factors);
     } else if (i > 0) {
       fprintf(stdout,  "error: unknown option %s\n", argv[i]);
       assert(0);
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
-      directory = NULL;
+      directory = "";
       user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_" + cold + "_" + std::to_string(i);
       item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_" + cold + "_" + std::to_string(i);
       mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_" + cold + "_" + std::to_string(i);
@@ -238,7 +238,7 @@ int main(int argc, char* argv[]) {
 
       printf("point 2\n");
 
-      if (strcmp(cold, "true") == 0) {
+      if (strcmp(cold.c_str(), "true") == 0) {
         for (int j = 0; j < 3; j++) {
           test << prefix << "/" << source << "/byUser_20k_review/CTR/test_" << cold << "_" << i << "_" << j << ".txt";
           test_path.push_back(test.str()); 
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
       printf("result directory: %s\n", directory.c_str());
     }
 
-    if (!file_exists(user_path.c_str()) {
+    if (!file_exists(user_path.c_str())) {
       printf("user file %s doesn't exist! quit ...\n", user_path.c_str());
       exit(-1);
     }
@@ -277,14 +277,14 @@ int main(int argc, char* argv[]) {
     printf("max iter: %d\n", max_iter);
     printf("number of factors: %d\n", num_factors);
 
-    if (mult_path != NULL) {
-      if (!file_exists(item_path.c_str()) {
+    if (mult_path != "") {
+      if (!file_exists(item_path.c_str())) {
         printf("mult file %s doesn't exist! quit ...\n", mult_path.c_str());
         exit(-1);
       }
       printf("mult file: %s\n", mult_path.c_str());
         
-      if (theta_init_path == NULL) {
+      if (theta_init_path == "") {
         printf("topic proportions file must be provided ...\n");
         exit(-1);
       }
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]) {
       }
       printf("topic proportions file: %s\n", theta_init_path.c_str());
 
-      if (beta_init_path == NULL) {
+      if (beta_init_path == "") {
         printf("topic distributions file must be provided ...\n");
         exit(-1);
       }
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
 
     /// save the settings
     int ctr_run = 1;
-    if (mult_path == NULL) ctr_run = 0;
+    if (mult_path == "") ctr_run = 0;
     ctr_hyperparameter ctr_param;
     ctr_param.set(a, b, lambda_u, lambda_v, learning_rate, alpha_smooth,
         random_seed, max_iter, save_lag, theta_opt, ctr_run, lda_regression);
@@ -342,7 +342,7 @@ int main(int argc, char* argv[]) {
     ctr->set_model_parameters(num_factors, num_users, num_items);
 
     c_corpus* c = NULL;
-    if (mult_path != NULL) {
+    if (mult_path != "") {
       // read word data
       c = new c_corpus();
       c->read_data(mult_path.c_str());
