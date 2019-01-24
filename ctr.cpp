@@ -649,7 +649,6 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   likelihood = -exp(50);
   converge = 1.0;
   for (int i = 0; i < test_c.size(); i++) {
-    printf("wordcount=%d\n", test_c[i]->m_num_total_words);
     printf("==== part %d in %d ====\n", i, test_c.size());
     iter = 0;
     while (iter < 10) {
@@ -662,6 +661,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
         user_ids = items->m_vec_data[j];
         m = items->m_vec_len[j];
+        printf("m=%d\n", m);
         if (m>0) {
           // m > 0, some users have rated this article
           // update the likelihood for the relevant part
