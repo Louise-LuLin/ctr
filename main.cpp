@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
     vector <c_corpus*> test_c;
     for (int j = 0; j < test_path.size(); j++) {
       c_corpus* tmp_c = new c_corpus();
-      tmp_c->read_data(test_path[j];
+      tmp_c->read_data(test_path[j]);
       test_c.push_back(tmp_c);
     }
 
