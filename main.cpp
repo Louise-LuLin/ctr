@@ -209,6 +209,9 @@ int main(int argc, char* argv[]) {
       sprintf(mult_path, "%s/%s/byUser_20k_review/CTR/corpus_%s_%d.txt", prefix, source, cold, i);
       sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.doc.states", prefix, source, cold, i, num_factors);
       sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.topics", prefix, source, cold, i, num_factors);
+
+      printf("user file is %s\n", user_path);
+
       if (strcmp(cold, "true") == 0) {
         for (int j = 0; j < 3; j++) {
           sprintf(test, "%s/%s/byUser_20k_review/CTR/test_%s_%d_%d.txt", prefix, source, cold, i, j);
