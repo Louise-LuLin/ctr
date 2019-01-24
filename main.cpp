@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   int theta_opt = 0;
   int lda_regression = 0;
 
-  const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:src:cld:cv:pre:";
+  const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:g:o:c:p:";
   const struct option long_options[] = {
     {"help",          no_argument,       NULL, 'h'},
     {"directory",     required_argument, NULL, 'd'},
@@ -70,10 +70,10 @@ int main(int argc, char* argv[]) {
     {"max_iter",      required_argument, NULL, 'm'},
     {"num_factors",   required_argument, NULL, 'k'},
     {"mult",          required_argument, NULL, 't'},
-    {"prefix",        required_argument, NULL, 'pre'},
-    {"source",        required_argument, NULL, 'src'},
-    {"cold",          required_argument, NULL, 'cld'},
-    {"crossV",        required_argument, NULL, 'cv'},
+    {"prefix",        required_argument, NULL, 'p'},
+    {"source",        required_argument, NULL, 'g'},
+    {"cold",          required_argument, NULL, 'o'},
+    {"crossV",        required_argument, NULL, 'c'},
     {"theta_init",    required_argument, NULL, 'e'},
     {"beta_init",     required_argument, NULL, 'y'},
     {"learning_rate", required_argument, NULL, 'z'},
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
   char* prefix = NULL;
   char* source = NULL;
-  char* cold = NULL;
+  std::string cold = NULL;
   int crossV = 1;
 
   double a = 1.0;
@@ -113,13 +113,13 @@ int main(int argc, char* argv[]) {
   while(true) {
     cc = getopt_long(argc, argv, short_options, long_options, NULL);
     switch(cc) {
-      case 'pre':
+      case 'p':
         prefix = optarg;
-      case 'src':
+      case 'g':
         source = optarg;
-      case 'cld':
+      case 'o':
         cold = optarg;
-      case 'cv':
+      case 'c':
         crossV = atoi(optarg);
       case 'h':
         print_usage_and_exit();
@@ -315,11 +315,11 @@ int main(int argc, char* argv[]) {
       ctr->read_init_information(theta_init_path, beta_init_path, c, alpha_smooth);
     }
 
-    vector <c_corpus*> test_c = NULL;
+    vector <c_corpus*> test_c;
     for (int j = 0; j < test_path.size(); j++) {
       c_corpus* tmp_c = new c_corpus();
-      tmp->read_data(test_path[j]);
-      test_c.push_back(tmp);
+      tmp_c->read_data(test_path[j]);
+      test_c.push_back(tmp_c);
     }
 
     if (learning_rate <= 0) {
