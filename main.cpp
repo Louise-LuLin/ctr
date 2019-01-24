@@ -56,42 +56,32 @@ int main(int argc, char* argv[]) {
   int theta_opt = 0;
   int lda_regression = 0;
 
-  const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:g:o:c:p:";
-  const struct option long_options[] = {
-    {"help",          no_argument,       NULL, 'h'},
-    {"directory",     required_argument, NULL, 'd'},
-    {"user",          required_argument, NULL, 'x'},
-    {"item",          required_argument, NULL, 'i'},
-    {"a",             required_argument, NULL, 'a'},
-    {"b",             required_argument, NULL, 'b'},
-    {"lambda_u",      required_argument, NULL, 'u'},
-    {"lambda_v",      required_argument, NULL, 'v'},
-    {"random_seed",   required_argument, NULL, 'r'},
-    {"save_lag",      required_argument, NULL, 's'},
-    {"max_iter",      required_argument, NULL, 'm'},
-    {"num_factors",   required_argument, NULL, 'k'},
-    {"mult",          required_argument, NULL, 't'},
-    {"prefix",        required_argument, NULL, 'p'},
-    {"source",        required_argument, NULL, 'g'},
-    {"cold",          required_argument, NULL, 'o'},
-    {"crossV",        required_argument, NULL, 'c'},
-    {"theta_init",    required_argument, NULL, 'e'},
-    {"beta_init",     required_argument, NULL, 'y'},
-    {"learning_rate", required_argument, NULL, 'z'},
-    {"alpha_smooth",  required_argument, NULL, 'w'},
-    {"theta_opt",     no_argument, &theta_opt, 1},
-    {"lda_regression",no_argument, &lda_regression, 1},
-    {NULL, 0, NULL, 0}};
-
-  char*  directory = NULL;
-
-  char*  user_path = NULL;
-  char*  item_path = NULL;
-
-  char* prefix = NULL;
-  char* source = NULL;
-  char* cold = NULL;
-  int crossV = 1;
+  // const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:g:o:c:p:";
+  // const struct option long_options[] = {
+  //   {"help",          no_argument,       NULL, 'h'},
+  //   {"directory",     required_argument, NULL, 'd'},
+  //   {"user",          required_argument, NULL, 'x'},
+  //   {"item",          required_argument, NULL, 'i'},
+  //   {"a",             required_argument, NULL, 'a'},
+  //   {"b",             required_argument, NULL, 'b'},
+  //   {"lambda_u",      required_argument, NULL, 'u'},
+  //   {"lambda_v",      required_argument, NULL, 'v'},
+  //   {"random_seed",   required_argument, NULL, 'r'},
+  //   {"save_lag",      required_argument, NULL, 's'},
+  //   {"max_iter",      required_argument, NULL, 'm'},
+  //   {"num_factors",   required_argument, NULL, 'k'},
+  //   {"mult",          required_argument, NULL, 't'},
+  //   {"prefix",        required_argument, NULL, 'p'},
+  //   {"source",        required_argument, NULL, 'g'},
+  //   {"cold",          required_argument, NULL, 'o'},
+  //   {"crossV",        required_argument, NULL, 'c'},
+  //   {"theta_init",    required_argument, NULL, 'e'},
+  //   {"beta_init",     required_argument, NULL, 'y'},
+  //   {"learning_rate", required_argument, NULL, 'z'},
+  //   {"alpha_smooth",  required_argument, NULL, 'w'},
+  //   {"theta_opt",     no_argument, &theta_opt, 1},
+  //   {"lda_regression",no_argument, &lda_regression, 1},
+  //   {NULL, 0, NULL, 0}};
 
   double a = 1.0;
   double b = 0.01;
@@ -106,88 +96,123 @@ int main(int argc, char* argv[]) {
   int    max_iter = 50;
 
   int    num_factors = 200;
-  char*  mult_path = NULL;
-  char*  theta_init_path = NULL;
-  char*  beta_init_path = NULL;
+  int    crossV = 1;
 
-  int cc = 0; 
-  while(true) {
-    cc = getopt_long(argc, argv, short_options, long_options, NULL);
-    switch(cc) {
-      case 'p':
-        prefix = optarg;
-        break;
-      case 'g':
-        source = optarg;
-        break;
-      case 'o':
-        cold = optarg;
-        break;
-      case 'c':
-        crossV = atoi(optarg);
-        break;
-      case 'h':
-        print_usage_and_exit();
-        break;
-      case 'd':
-        directory = optarg;
-        break;
-      case 'x':
-        user_path = optarg;
-        break;
-      case 'i':
-        item_path = optarg;
-        break;
-      case 'a':
-        a = atof(optarg);
-        break;
-      case 'b':
-        b = atof(optarg);
-        break;
-      case 'u':
-        lambda_u = atof(optarg);
-        break;
-      case 'v':
-        lambda_v = atof(optarg);
-        break;
-      case 'z':
-        learning_rate = atof(optarg);
-        break;
-      case 'w':
-        alpha_smooth = atof(optarg);
-        break;
-      case 'r':
-        random_seed = atoi(optarg);
-        break;
-      case 's':
-        save_lag = atoi(optarg);
-        break;
-      case 'm':
-        max_iter =  atoi(optarg);
-        break;    
-      case 'k':
-        num_factors = atoi(optarg);
-        break;
-      case 't':
-        mult_path = optarg;
-        break;
-      case 'e':
-        theta_init_path = optarg;
-        break;
-      case 'y':
-        beta_init_path = optarg;
-        break;
-      case -1:
-        break;
-      case '?':
-        print_usage_and_exit();
-        break;
-      default:
-        break;
-    }
-    if (cc == -1)
-      break;
-  }
+  string prefix="/zf18/ll5fy/lab/dataset";
+  string source="YelpNew";
+  string cold="true";
+
+  string  directory = NULL;
+  string  user_path = NULL;
+  string  item_path = NULL;
+  string  mult_path = NULL;
+  string  theta_init_path = NULL;
+  string  beta_init_path = NULL;
+
+  int i=0;
+  while (i <= argc - 1) {
+    if (strcmp(argv[i], "-prefix") == 0) {
+      prefix = string(argv[++i]);
+      fprintf(stdout, "+ prefix = %s\n", prefix.c_str());
+    } else if (strcmp(argv[i], "-source") == 0) {
+      source = string(argv[++i]);
+      fprintf(stdout, "+ source = %s\n", source.c_str());
+    } else if (strcmp(argv[i], "-cold") == 0) {
+      cold = string(argv[++i]);
+      fprintf(stdout, "+ cold = %s\n", cold.c_str());
+    } else if (strcmp(argv[i], "-iter") == 0){
+      max_iter = atoi(argv[++i]);
+      fprintf(stdout, "+ iter = %d\n", iter);
+    } else if (strcmp(argv[i], "-crossV") == 0) {
+      crossV = atoi(argv[++i]);
+      fprintf(stdout, "+ crossV = %d\n", crossV);
+    } else if (strcmp(argv[i], "-k") == 0) {
+      num_factors = atoi(argv[++i]);
+      fprintf(stdout, "+ k = %d\n", K);
+    } else if (i > 0) {
+      fprintf(stdout,  "error: unknown option %s\n", argv[i]);
+      assert(0);
+    } 
+    ++i;
+  };
+  // int cc = 0; 
+  // while(true) {
+  //   cc = getopt_long(argc, argv, short_options, long_options, NULL);
+  //   switch(cc) {
+  //     case 'p':
+  //       prefix = optarg;
+  //       break;
+  //     case 'g':
+  //       source = optarg;
+  //       break;
+  //     case 'o':
+  //       cold = optarg;
+  //       break;
+  //     case 'c':
+  //       crossV = atoi(optarg);
+  //       break;
+  //     case 'h':
+  //       print_usage_and_exit();
+  //       break;
+  //     // case 'd':
+  //     //   directory = optarg;
+  //     //   break;
+  //     // case 'x':
+  //     //   user_path = optarg;
+  //     //   break;
+  //     // case 'i':
+  //     //   item_path = optarg;
+  //       // break;
+  //     case 'a':
+  //       a = atof(optarg);
+  //       break;
+  //     case 'b':
+  //       b = atof(optarg);
+  //       break;
+  //     case 'u':
+  //       lambda_u = atof(optarg);
+  //       break;
+  //     case 'v':
+  //       lambda_v = atof(optarg);
+  //       break;
+  //     case 'z':
+  //       learning_rate = atof(optarg);
+  //       break;
+  //     case 'w':
+  //       alpha_smooth = atof(optarg);
+  //       break;
+  //     case 'r':
+  //       random_seed = atoi(optarg);
+  //       break;
+  //     case 's':
+  //       save_lag = atoi(optarg);
+  //       break;
+  //     case 'm':
+  //       max_iter =  atoi(optarg);
+  //       break;    
+  //     case 'k':
+  //       num_factors = atoi(optarg);
+  //       break;
+  //     // case 't':
+  //     //   mult_path = optarg;
+  //     //   break;
+  //     // case 'e':
+  //     //   theta_init_path = optarg;
+  //     //   break;
+  //     // case 'y':
+  //     //   beta_init_path = optarg;
+  //       // break;
+  //     case -1:
+  //       break;
+  //     case '?':
+  //       print_usage_and_exit();
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  //   if (cc == -1)
+  //     break;
+  // }
 
 
   for (int i = 0; i < crossV; i++) {
@@ -197,20 +222,19 @@ int main(int argc, char* argv[]) {
     std::stringstream test;
 
     if (crossV == 1) {
-      sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
-      sprintf(user_path, "%s/%s/byUser_20k_review/CTR/user.txt", prefix, source);
-      sprintf(item_path, "%s/%s/byUser_20k_review/CTR/item.txt", prefix, source);
-      sprintf(mult_path, "%s/%s/byUser_20k_review/CTR/corpus.txt", prefix, source);
-      sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%d.doc.states", prefix, source, num_factors);
-      sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%d.topics", prefix, source, num_factors);
+      directory = prefix + "/output/" + source + "/byUser_20k_review";
+      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user.txt";
+      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item.txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus.txt";
+      theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
+      beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
       directory = NULL;
-      sprintf(user_path, "%s/%s/byUser_20k_review/CTR/user_%s_%d.txt", prefix, source, cold, i);
-      printf("point 0\n");
-      sprintf(item_path, "%s/%s/byUser_20k_review/CTR/item_%s_%d.txt", prefix, source, cold, i);
-      sprintf(mult_path, "%s/%s/byUser_20k_review/CTR/corpus_%s_%d.txt", prefix, source, cold, i);
-      sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.doc.states", prefix, source, cold, i, num_factors);
-      sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.topics", prefix, source, cold, i, num_factors);
+      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_" + cold + "_" + std::to_string(i);
+      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_" + cold + "_" + std::to_string(i);
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_" + cold + "_" + std::to_string(i);
+      theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(i) + "_" + std::to_string(num_factors) + ".doc.states";
+      beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(i) + "_" + std::to_string(num_factors) + ".topics";
 
       printf("point 2\n");
 
@@ -226,21 +250,21 @@ int main(int argc, char* argv[]) {
     }
     
     if (crossV == 1) {
-      if (!dir_exists(directory)) make_directory(directory);
-      printf("result directory: %s\n", directory);
+      if (!dir_exists(directory.c_str())) make_directory(directory.c_str());
+      printf("result directory: %s\n", directory.c_str());
     }
 
-    if (!file_exists(user_path)) {
-      printf("user file %s doesn't exist! quit ...\n", user_path);
+    if (!file_exists(user_path.c_str()) {
+      printf("user file %s doesn't exist! quit ...\n", user_path.c_str());
       exit(-1);
     }
-    printf("user file: %s\n", user_path);
+    printf("user file: %s\n", user_path.c_str());
 
-    if (!file_exists(item_path)) {
-      printf("item file %s doesn't exist! quit ...\n", item_path);
+    if (!file_exists(item_path.c_str())) {
+      printf("item file %s doesn't exist! quit ...\n", item_path.c_str());
       exit(-1);
     }
-    printf("item file: %s\n", item_path);
+    printf("item file: %s\n", item_path.c_str());
 
     printf("a: %.4f\n", a);
     printf("b: %.4f\n", b);
@@ -254,31 +278,31 @@ int main(int argc, char* argv[]) {
     printf("number of factors: %d\n", num_factors);
 
     if (mult_path != NULL) {
-      if (!file_exists(item_path)) {
-        printf("mult file %s doesn't exist! quit ...\n", mult_path);
+      if (!file_exists(item_path.c_str()) {
+        printf("mult file %s doesn't exist! quit ...\n", mult_path.c_str());
         exit(-1);
       }
-      printf("mult file: %s\n", mult_path);
+      printf("mult file: %s\n", mult_path.c_str());
         
       if (theta_init_path == NULL) {
         printf("topic proportions file must be provided ...\n");
         exit(-1);
       }
-      if (!file_exists(theta_init_path)) {
-        printf("topic proportions file %s doesn't exist! quit ...\n", theta_init_path);
+      if (!file_exists(theta_init_path.c_str())) {
+        printf("topic proportions file %s doesn't exist! quit ...\n", theta_init_path.c_str());
         exit(-1);
       }
-      printf("topic proportions file: %s\n", theta_init_path);
+      printf("topic proportions file: %s\n", theta_init_path.c_str());
 
       if (beta_init_path == NULL) {
         printf("topic distributions file must be provided ...\n");
         exit(-1);
       }
-      if (!file_exists(beta_init_path)) {
-        printf("topic distributions file %s doesn't exist! quit ...\n", beta_init_path);
+      if (!file_exists(beta_init_path.c_str())) {
+        printf("topic distributions file %s doesn't exist! quit ...\n", beta_init_path.c_str());
         exit(-1);
       }
-      printf("topic distributions file: %s\n", beta_init_path);
+      printf("topic distributions file: %s\n", beta_init_path.c_str());
       if (theta_opt) printf("theta optimization: True\n");
       else printf("theta optimization: false\n");
     } else if (theta_opt) {
@@ -302,15 +326,15 @@ int main(int argc, char* argv[]) {
     RANDOM_NUMBER = new_random_number_generator(random_seed);
 
     // read users
-    printf("reading user matrix from %s ...\n", user_path);
+    printf("reading user matrix from %s ...\n", user_path.c_str());
     c_data* users = new c_data(); 
-    users->read_data(user_path);
+    users->read_data(user_path.c_str());
     int num_users = (int)users->m_vec_data.size();
 
     // read items
-    printf("reading item matrix from %s ...\n", item_path);
+    printf("reading item matrix from %s ...\n", item_path.c_str());
     c_data* items = new c_data(); 
-    items->read_data(item_path);
+    items->read_data(item_path.c_str());
     int num_items = (int)items->m_vec_data.size();
 
     // create model instance
@@ -321,11 +345,11 @@ int main(int argc, char* argv[]) {
     if (mult_path != NULL) {
       // read word data
       c = new c_corpus();
-      c->read_data(mult_path);
-      ctr->read_init_information(theta_init_path, beta_init_path, c, alpha_smooth);
+      c->read_data(mult_path.c_str());
+      ctr->read_init_information(theta_init_path.c_str(), beta_init_path.c_str(), c, alpha_smooth);
     }
 
-    vector <c_corpus*> test_c;
+    vector<c_corpus*> test_c;
     for (int j = 0; j < test_path.size(); j++) {
       c_corpus* tmp_c = new c_corpus();
       tmp_c->read_data(test_path[j].c_str());
@@ -333,9 +357,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (learning_rate <= 0) {
-      ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory);
+      ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
     } else {
-      ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory);
+      ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
     }
 
     free_random_number_generator(RANDOM_NUMBER);
