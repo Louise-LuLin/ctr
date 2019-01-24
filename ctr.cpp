@@ -679,7 +679,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           gsl_blas_ddot(x, x, &result);
           likelihood += -0.5 * param->lambda_v * result;
           
-          if (param->ctr_run && param->theta_opt) {
+          if (param->ctr_run) {
             const c_document* doc =  test_c[i]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
@@ -698,18 +698,18 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           }
         }        
       }
-      
+
       iter++;
       printf("item=%d\n", j);
       // printf("wordcount=%d\n", test_c[i]->m_num_total_words);
-      printf("likelihood=%d\n", likelihood);
+      printf("iter=%04d, likelihood=%.5f\n", iter, likelihood);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
       // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
       // fflush(file);
-      printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
-        iter, likelihood, test_c[i]->m_num_total_words, exp(-likelihood/test_c[i]->m_num_total_words));
+      // printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
+      //   iter, likelihood, test_c[i]->m_num_total_words, exp(-likelihood/test_c[i]->m_num_total_words));
 
     }
   }
