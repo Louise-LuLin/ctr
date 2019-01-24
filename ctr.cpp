@@ -648,7 +648,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   //test
   likelihood = -exp(50);
   converge = 1.0;
-  for (test_idx = 0; test_idx < test_c.size(); test_idx++) {
+  for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
     printf("==== part %d in %d ====\n", test_idx, test_c.size());
     iter = 0;
     while (iter < 10) {
