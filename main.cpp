@@ -192,7 +192,7 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < crossV; i++) {
     /// print information
     printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
-    vector <string> test_path; 
+    vector <char*> test_path; 
     char* test = NULL;
 
     if (crossV == 1) {
@@ -279,8 +279,7 @@ int main(int argc, char* argv[]) {
       printf("topic distributions file: %s\n", beta_init_path);
       if (theta_opt) printf("theta optimization: True\n");
       else printf("theta optimization: false\n");
-    }
-    else if (theta_opt) {
+    } else if (theta_opt) {
       printf("theta optimization: false");
       printf("(theta_opt has no effect, back to default value: false)\n");
       theta_opt = 0;
@@ -327,7 +326,7 @@ int main(int argc, char* argv[]) {
     vector <c_corpus*> test_c;
     for (int j = 0; j < test_path.size(); j++) {
       c_corpus* tmp_c = new c_corpus();
-      tmp_c->read_data(test_path[j].c_str());
+      tmp_c->read_data(test_path[j];
       test_c.push_back(tmp_c);
     }
 
@@ -344,5 +343,5 @@ int main(int argc, char* argv[]) {
     delete users;
     delete items;
     return 0;
-    }
+  }
 }
