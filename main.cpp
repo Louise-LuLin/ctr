@@ -49,7 +49,7 @@ void print_usage_and_exit() {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc < 2) print_usage_and_exit();
+  // if (argc < 2) print_usage_and_exit();
 
   char filename[500];
   int theta_opt = 0;
@@ -113,13 +113,13 @@ int main(int argc, char* argv[]) {
   while(true) {
     cc = getopt_long(argc, argv, short_options, long_options, NULL);
     switch(cc) {
-      case 'p':
+      case 'prefix':
         prefix = optarg;
-      case 'g':
+      case 'source':
         source = optarg;
-      case 'o':
+      case 'cold':
         cold = optarg;
-      case 'c':
+      case 'crossV':
         crossV = atoi(optarg);
       case 'h':
         print_usage_and_exit();
