@@ -66,7 +66,7 @@ public:
                             int num_items);
 
   void learn_map_estimate(const c_data* users, const c_data* items, 
-                          const c_corpus* c, const ctr_hyperparameter* param,
+                          const c_corpus* c, const vector <c_corpus*> test_c, const ctr_hyperparameter* param,
                           const char* directory);
 
   void stochastic_learn_map_estimate(const c_data* users, const c_data* items, 
