@@ -649,9 +649,10 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   likelihood = -exp(50);
   converge = 1.0;
   for (int i = 0; i < test_c.size(); i++) {
+    printf("wordcount=%d\n", test_c[i]->m_num_total_words);
     printf("==== part %d in %d ====\n", i, test_c.size());
     iter = 0;
-    while (iter < min_iter) {
+    while (iter < 10) {
       likelihood_old = likelihood;
       likelihood = 0.0;
 
