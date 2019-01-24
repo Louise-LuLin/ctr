@@ -220,8 +220,10 @@ int main(int argc, char* argv[]) {
       }
     }
     
-    if (!dir_exists(directory)) make_directory(directory);
-    printf("result directory: %s\n", directory);
+    if (crossV == 1) {
+      if (!dir_exists(directory)) make_directory(directory);
+      printf("result directory: %s\n", directory);
+    }
 
     if (!file_exists(user_path)) {
       printf("user file %s doesn't exist! quit ...\n", user_path);
