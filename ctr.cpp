@@ -655,6 +655,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       likelihood_old = likelihood;
       likelihood = 0.0;
 
+      printf("wordcount=%d\n", test_c[i]->m_num_total_words);
       for (j = 0; j < m_num_items; j ++) {
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
@@ -679,7 +680,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           gsl_blas_ddot(x, x, &result);
           likelihood += -0.5 * param->lambda_v * result;
           
-          if (param->ctr_run) {
+          if (param->ctr_run && param->theta_opt) {
             const c_document* doc =  test_c[i]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
