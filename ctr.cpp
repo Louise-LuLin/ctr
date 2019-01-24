@@ -701,7 +701,8 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       }
     
       iter++;
-      printf("%f, %d\n", likelihood, test_c[i]->m_num_total_words);
+      printf("wordcount=%d\n", test_c[i]->m_num_total_words);
+      printf("likelihood=%d\n", likelihood);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
