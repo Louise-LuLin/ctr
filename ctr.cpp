@@ -651,7 +651,6 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     printf("==== part %d ====\n", j);
     iter = 0;
     while (iter < min_iter) {
-      printf("<iter %d>\n", iter);
       likelihood_old = likelihood;
       likelihood = 0.0;
       for (j = 0; j < m_num_items; j ++) {
@@ -685,8 +684,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
               optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
             }
           }
-        }
-        else {
+        } else {
         // m=0, this article has never been rated
           if (param->ctr_run && param->theta_opt) {
             const c_document* doc =  test_c[j]->m_docs[j];
@@ -702,6 +700,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       elapsed = (int)difftime(current, start);
 
       iter++;
+      printf("<iter %d>\n", iter);
       converge = fabs((likelihood-likelihood_old)/likelihood_old);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
