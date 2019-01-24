@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
   time_t t; time(&t);
   long   random_seed = (long) t;
   int    save_lag = 20;
-  int    max_iter = 50;
+  int    max_iter = 30;
 
   int    num_factors = 200;
   int    crossV = 1;

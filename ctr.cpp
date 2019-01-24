@@ -592,7 +592,8 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
     // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
     // fflush(file);
-    printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f\n", iter, elapsed, likelihood, converge);
+    printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
+      iter, elapsed, likelihood, converge, exp(-likelihood/c->m_num_total_words));
 
     // save intermediate results
     // if (iter % param->save_lag == 0) {
@@ -645,10 +646,12 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   // }
 
   //test
+  likelihood = -exp(50);
   for (int j = 0; j < test_c.size(); j++) {
     printf("==== part %d ====\n", j);
     iter = 0;
     while (iter < min_iter) {
+      printf("<iter %d>\n", iter);
       likelihood_old = likelihood;
       likelihood = 0.0;
       for (j = 0; j < m_num_items; j ++) {
