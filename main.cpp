@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
     /// print information
     printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
     vector <string> test_path; 
-    char* test;
+    char* test = NULL;
 
     if (crossV == 1) {
       sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
