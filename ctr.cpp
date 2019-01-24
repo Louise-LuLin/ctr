@@ -679,7 +679,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           // likelihood += -0.5 * param->lambda_v * result;
           
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[j]->m_docs[j];
+            const c_document* doc =  test_c[i]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
               optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
@@ -688,7 +688,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         } else {
         // m=0, this article has never been rated
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[j]->m_docs[j];
+            const c_document* doc =  test_c[i]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
               vnormalize(gamma);

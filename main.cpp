@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   // if (argc < 2) print_usage_and_exit();
 
   char filename[500];
-  int theta_opt = 0;
+  int theta_opt = 1;
   int lda_regression = 0;
 
   // const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:g:o:c:p:";
