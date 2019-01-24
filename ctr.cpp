@@ -656,12 +656,12 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       likelihood = 0.0;
 
       for (j = 0; j < m_num_items; j ++) {
+        printf("item=%d in %d\n", j, m_num_items);
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
 
         user_ids = items->m_vec_data[j];
         m = items->m_vec_len[j];
-        printf("m=%d\n", m);
         if (m>0) {
           // m > 0, some users have rated this article
           // update the likelihood for the relevant part
