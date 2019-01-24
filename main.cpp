@@ -113,14 +113,18 @@ int main(int argc, char* argv[]) {
   while(true) {
     cc = getopt_long(argc, argv, short_options, long_options, NULL);
     switch(cc) {
-      case 'prefix':
+      case 'p':
         prefix = optarg;
-      case 'source':
+        break;
+      case 'g':
         source = optarg;
-      case 'cold':
+        break;
+      case 'o':
         cold = optarg;
-      case 'crossV':
+        break;
+      case 'c':
         crossV = atoi(optarg);
+        break;
       case 'h':
         print_usage_and_exit();
         break;
