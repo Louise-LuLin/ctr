@@ -647,6 +647,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
   //test
   likelihood = -exp(50);
+  converge = 1.0;
   for (int j = 0; j < test_c.size(); j++) {
     printf("==== part %d ====\n", j);
     iter = 0;
@@ -701,7 +702,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
       iter++;
       printf("<iter %d>\n", iter);
-      converge = fabs((likelihood-likelihood_old)/likelihood_old);
+      // converge = fabs((likelihood-likelihood_old)/likelihood_old);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
