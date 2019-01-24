@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
 
   for (int i = 0; i < crossV; i++) {
     /// print information
-    printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
+    printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold.c_str());
     std::vector<std::string> test_path; 
     std::stringstream test;
 
@@ -230,9 +230,9 @@ int main(int argc, char* argv[]) {
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
       directory = "";
-      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_" + cold + "_" + std::to_string(i);
-      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_" + cold + "_" + std::to_string(i);
-      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_" + cold + "_" + std::to_string(i);
+      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_" + cold + "_" + std::to_string(i) + ".txt";
+      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_" + cold + "_" + std::to_string(i) + ".txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_" + cold + "_" + std::to_string(i) + ".txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(i) + "_" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(i) + "_" + std::to_string(num_factors) + ".topics";
 
