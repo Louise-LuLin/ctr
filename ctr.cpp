@@ -648,14 +648,13 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   //test
   likelihood = -exp(50);
   converge = 1.0;
-  for (int i = 0; i < test_c.size(); i++) {
-    printf("==== part %d in %d ====\n", i, test_c.size());
+  for (test_idx = 0; test_idx < test_c.size(); test_idx++) {
+    printf("==== part %d in %d ====\n", test_idx, test_c.size());
     iter = 0;
     while (iter < 10) {
       likelihood_old = likelihood;
       likelihood = 0.0;
 
-      printf("wordcount=%d\n", test_c[i]->m_num_total_words);
       for (j = 0; j < m_num_items; j ++) {
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
@@ -681,7 +680,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           likelihood += -0.5 * param->lambda_v * result;
           
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[i]->m_docs[j];
+            const c_document* doc =  test_c[test_idx]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
               optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
@@ -690,7 +689,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         } else {
         // m=0, this article has never been rated
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[i]->m_docs[j];
+            const c_document* doc =  test_c[test_idx]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
               vnormalize(gamma);
@@ -702,6 +701,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
       iter++;
       printf("item=%d\n", j);
+      printf("wordcount=%d\n", test_c[test_idx]->m_num_total_words);
       // printf("wordcount=%d\n", test_c[i]->m_num_total_words);
       printf("iter=%04d, likelihood=%.5f\n", iter, likelihood);
 
@@ -709,8 +709,8 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
       // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
       // fflush(file);
-      // printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
-      //   iter, likelihood, test_c[i]->m_num_total_words, exp(-likelihood/test_c[i]->m_num_total_words));
+      printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
+        iter, likelihood, test_c[test_idx]->m_num_total_words, exp(-likelihood/test_c[test_idx]->m_num_total_words));
 
     }
   }
