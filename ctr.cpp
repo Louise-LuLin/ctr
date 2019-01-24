@@ -649,11 +649,12 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   likelihood = -exp(50);
   converge = 1.0;
   for (int i = 0; i < test_c.size(); i++) {
-    printf("==== part %d ====\n", i);
+    printf("==== part %d in %d ====\n", i, test_c.size());
     iter = 0;
     while (iter < min_iter) {
       likelihood_old = likelihood;
       likelihood = 0.0;
+
       for (j = 0; j < m_num_items; j ++) {
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
@@ -697,18 +698,16 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           }
         }        
       }
-      time(&current);
-      elapsed = (int)difftime(current, start);
-
+    
       iter++;
-      converge = fabs((likelihood-likelihood_old)/likelihood_old);
+      printf("%f, %d\n", likelihood, test_c[i]->m_num_total_words);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
       // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
       // fflush(file);
-      printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, wordcount=%d, perplexity=%.5f\n", 
-        iter, elapsed, likelihood, converge, test_c[i]->m_num_total_words, exp(-likelihood/test_c[i]->m_num_total_words));
+      printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
+        iter, likelihood, test_c[i]->m_num_total_words, exp(-likelihood/test_c[i]->m_num_total_words));
 
     }
   }
