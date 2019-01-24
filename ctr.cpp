@@ -679,7 +679,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           gsl_blas_ddot(x, x, &result);
           likelihood += -0.5 * param->lambda_v * result;
           
-          if (param->ctr_run) {
+          if (param->ctr_run && param->theta_opt) {
             const c_document* doc =  test_c[test_idx]->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 

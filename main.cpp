@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
   double lambda_u = 0.01;
   double lambda_v = 100;
   double learning_rate = -1;
-  double alpha_smooth = 0.0;
+  double alpha_smooth = 1.1;
 
   time_t t; time(&t);
   long   random_seed = (long) t;
@@ -129,6 +129,12 @@ int main(int argc, char* argv[]) {
     } else if (strcmp(argv[i], "-k") == 0) {
       num_factors = atoi(argv[++i]);
       fprintf(stdout, "+ k = %d\n", num_factors);
+    } else if (strcmp(argv[i], "-theta_opt") == 0) {
+      theta_opt = atoi(argv[++i]);
+      fprintf(stdout, "+ theta_opt = %d\n", theta_opt);
+    } else if (strcmp(argv[i], "-lr") == 0) {
+      learning_rate = atof(argv[++i]);
+      fprintf(stdout, "+ learning_rate = %d\n", learning_rate);
     } else if (i > 0) {
       fprintf(stdout,  "error: unknown option %s\n", argv[i]);
       assert(0);
