@@ -656,7 +656,6 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       likelihood = 0.0;
 
       for (j = 0; j < m_num_items; j ++) {
-        printf("item=%d in %d\n", j, m_num_items);
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
 
@@ -699,9 +698,10 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           }
         }        
       }
-    
+      
       iter++;
-      printf("wordcount=%d\n", test_c[i]->m_num_total_words);
+      printf("item=%d\n", j);
+      // printf("wordcount=%d\n", test_c[i]->m_num_total_words);
       printf("likelihood=%d\n", likelihood);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
