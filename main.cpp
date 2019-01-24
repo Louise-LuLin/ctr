@@ -194,7 +194,10 @@ int main(int argc, char* argv[]) {
     /// print information
     printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
     std::vector<std::string> test_path; 
+    printf("point 0\n");
     std::stringstream test;
+
+    printf("point 1\n");
 
     if (crossV == 1) {
       sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
@@ -211,7 +214,7 @@ int main(int argc, char* argv[]) {
       sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.doc.states", prefix, source, cold, i, num_factors);
       sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.topics", prefix, source, cold, i, num_factors);
 
-      printf("user file is %s\n", user_path);
+      printf("point 2\n");
 
       if (strcmp(cold, "true") == 0) {
         for (int j = 0; j < 3; j++) {
