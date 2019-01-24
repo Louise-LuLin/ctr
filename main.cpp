@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <getopt.h>
+#include <vector>
 #include "ctr.h"
+
+using namespace std; 
 
 gsl_rng * RANDOM_NUMBER = NULL;
 
@@ -34,7 +38,7 @@ void print_usage_and_exit() {
 
   printf("      --num_factors:    the number of factors, default 200\n");
   printf("      --mult:           mult file, in lda-c format, optional, if not provided, it's the matrix factorization\n");
-  printf("      --theta_init:     topic proportions file from lda, optional (required if mult file is provided)\n");
+  printf("      --:     topic proportions file from lda, optional (required if mult file is provided)\n");
   printf("      --beta_init:      topic distributions file from lda, optional (required if mult file is provided)\n");
   printf("      --theta_opt:      optimize theta or not, optional, default not\n");
   printf("      --lda_regression: run lda regression, default not\n");
@@ -51,7 +55,7 @@ int main(int argc, char* argv[]) {
   int theta_opt = 0;
   int lda_regression = 0;
 
-  const char* const short_options = "hd:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:";
+  const char* const short_options = "h:d:x:i:a:b:u:v:r:s:m:k:t:e:y:z:w:src:cld:cv:pre:";
   const struct option long_options[] = {
     {"help",          no_argument,       NULL, 'h'},
     {"directory",     required_argument, NULL, 'd'},
@@ -66,6 +70,10 @@ int main(int argc, char* argv[]) {
     {"max_iter",      required_argument, NULL, 'm'},
     {"num_factors",   required_argument, NULL, 'k'},
     {"mult",          required_argument, NULL, 't'},
+    {"prefix",        required_argument, NULL, 'pre'},
+    {"source",        required_argument, NULL, 'src'},
+    {"cold",          required_argument, NULL, 'cld'},
+    {"crossV",        required_argument, NULL, 'cv'},
     {"theta_init",    required_argument, NULL, 'e'},
     {"beta_init",     required_argument, NULL, 'y'},
     {"learning_rate", required_argument, NULL, 'z'},
@@ -78,6 +86,12 @@ int main(int argc, char* argv[]) {
 
   char*  user_path = NULL;
   char*  item_path = NULL;
+
+  char* prefix = NULL;
+  char* source = NULL;
+  char* cold = NULL;
+  int crossV = 1;
+
   double a = 1.0;
   double b = 0.01;
   double lambda_u = 0.01;
@@ -88,7 +102,7 @@ int main(int argc, char* argv[]) {
   time_t t; time(&t);
   long   random_seed = (long) t;
   int    save_lag = 20;
-  int    max_iter = 200;
+  int    max_iter = 50;
 
   int    num_factors = 200;
   char*  mult_path = NULL;
@@ -99,6 +113,14 @@ int main(int argc, char* argv[]) {
   while(true) {
     cc = getopt_long(argc, argv, short_options, long_options, NULL);
     switch(cc) {
+      case 'pre':
+        prefix = optarg;
+      case 'src':
+        source = optarg;
+      case 'cld':
+        cold = optarg;
+      case 'cv':
+        crossV = atoi(optarg);
       case 'h':
         print_usage_and_exit();
         break;
@@ -162,119 +184,156 @@ int main(int argc, char* argv[]) {
       break;
   }
 
-  /// print information
-  printf("\n************************************************************************************************\n");
-  
-  if (!dir_exists(directory)) make_directory(directory);
-  printf("result directory: %s\n", directory);
 
-  if (!file_exists(user_path)) {
-    printf("user file %s doesn't exist! quit ...\n", user_path);
-    exit(-1);
-  }
-  printf("user file: %s\n", user_path);
+  for (int i = 0; i < crossV; i++) {
+    /// print information
+    printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
+    vector <string> test_path; 
+    char* test;
 
-  if (!file_exists(item_path)) {
-    printf("item file %s doesn't exist! quit ...\n", item_path);
-    exit(-1);
-  }
-  printf("item file: %s\n", item_path);
+    if (crossV == 1) {
+      sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
+      sprintf(user_path, "%s/%s/byUser_20k_review/CTR/user.txt", prefix, source);
+      sprintf(item_path, "%s/%s/byUser_20k_review/CTR/item.txt", prefix, source);
+      sprintf(mult_path, "%s/%s/byUser_20k_review/CTR/corpus.txt", prefix, source);
+      sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%d.doc.states", prefix, source, num_factors);
+      sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%d.topics", prefix, source, num_factors);
+    } else {
+      directory = NULL;
+      sprintf(user_path, "%s/%s/byUser_20k_review/CTR/user_%s_%d.txt", prefix, source, cold, i);
+      sprintf(item_path, "%s/%s/byUser_20k_review/CTR/item_%s_%d.txt", prefix, source, cold, i);
+      sprintf(mult_path, "%s/%s/byUser_20k_review/CTR/corpus_%s_%d.txt", prefix, source, cold, i);
+      sprintf(theta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.doc.states", prefix, source, cold, i, num_factors);
+      sprintf(beta_init_path, "%s/%s/byUser_20k_review/CTR/%s_fold%d_%d.topics", prefix, source, cold, i, num_factors);
+      if (cold == "true") {
+        for (int j = 0; j < 3; j++) {
+          sprintf(test, "%s/%s/byUser_20k_review/CTR/test_%s_%d_%d.txt", prefix, source, cold, i, j);
+          test_path.push_back(test); 
+        }
+      } else {
+        sprintf(test, "%s/%s/byUser_20k_review/CTR/test_%s_%d.txt", prefix, source, cold, i);
+        test_path.push_back(test); 
+      }
+    }
+    
+    if (!dir_exists(directory)) make_directory(directory);
+    printf("result directory: %s\n", directory);
 
-  printf("a: %.4f\n", a);
-  printf("b: %.4f\n", b);
-  printf("lambda_u: %.4f\n", lambda_u);
-  printf("lambda_v: %.4f\n", lambda_v);
-  printf("learning_rate: %.5f\n", learning_rate);
-  printf("alpha_smooth: %.5f\n", alpha_smooth);
-  printf("random seed: %d\n", (int)random_seed);
-  printf("save lag: %d\n", save_lag);
-  printf("max iter: %d\n", max_iter);
-  printf("number of factors: %d\n", num_factors);
+    if (!file_exists(user_path)) {
+      printf("user file %s doesn't exist! quit ...\n", user_path);
+      exit(-1);
+    }
+    printf("user file: %s\n", user_path);
 
-  if (mult_path != NULL) {
     if (!file_exists(item_path)) {
-      printf("mult file %s doesn't exist! quit ...\n", mult_path);
+      printf("item file %s doesn't exist! quit ...\n", item_path);
       exit(-1);
     }
-    printf("mult file: %s\n", mult_path);
-      
-    if (theta_init_path == NULL) {
-      printf("topic proportions file must be provided ...\n");
-      exit(-1);
+    printf("item file: %s\n", item_path);
+
+    printf("a: %.4f\n", a);
+    printf("b: %.4f\n", b);
+    printf("lambda_u: %.4f\n", lambda_u);
+    printf("lambda_v: %.4f\n", lambda_v);
+    printf("learning_rate: %.5f\n", learning_rate);
+    printf("alpha_smooth: %.5f\n", alpha_smooth);
+    printf("random seed: %d\n", (int)random_seed);
+    printf("save lag: %d\n", save_lag);
+    printf("max iter: %d\n", max_iter);
+    printf("number of factors: %d\n", num_factors);
+
+    if (mult_path != NULL) {
+      if (!file_exists(item_path)) {
+        printf("mult file %s doesn't exist! quit ...\n", mult_path);
+        exit(-1);
+      }
+      printf("mult file: %s\n", mult_path);
+        
+      if (theta_init_path == NULL) {
+        printf("topic proportions file must be provided ...\n");
+        exit(-1);
+      }
+      if (!file_exists(theta_init_path)) {
+        printf("topic proportions file %s doesn't exist! quit ...\n", theta_init_path);
+        exit(-1);
+      }
+      printf("topic proportions file: %s\n", theta_init_path);
+
+      if (beta_init_path == NULL) {
+        printf("topic distributions file must be provided ...\n");
+        exit(-1);
+      }
+      if (!file_exists(beta_init_path)) {
+        printf("topic distributions file %s doesn't exist! quit ...\n", beta_init_path);
+        exit(-1);
+      }
+      printf("topic distributions file: %s\n", beta_init_path);
+      if (theta_opt) printf("theta optimization: True\n");
+      else printf("theta optimization: false\n");
     }
-    if (!file_exists(theta_init_path)) {
-      printf("topic proportions file %s doesn't exist! quit ...\n", theta_init_path);
-      exit(-1);
+    else if (theta_opt) {
+      printf("theta optimization: false");
+      printf("(theta_opt has no effect, back to default value: false)\n");
+      theta_opt = 0;
     }
-    printf("topic proportions file: %s\n", theta_init_path);
 
-    if (beta_init_path == NULL) {
-      printf("topic distributions file must be provided ...\n");
-      exit(-1);
+    printf("\n");
+
+    /// save the settings
+    int ctr_run = 1;
+    if (mult_path == NULL) ctr_run = 0;
+    ctr_hyperparameter ctr_param;
+    ctr_param.set(a, b, lambda_u, lambda_v, learning_rate, alpha_smooth,
+        random_seed, max_iter, save_lag, theta_opt, ctr_run, lda_regression);
+    // sprintf(filename, "%s/settings.txt", directory); 
+    // ctr_param.save(filename);
+    
+    /// init random numbe generator
+    RANDOM_NUMBER = new_random_number_generator(random_seed);
+
+    // read users
+    printf("reading user matrix from %s ...\n", user_path);
+    c_data* users = new c_data(); 
+    users->read_data(user_path);
+    int num_users = (int)users->m_vec_data.size();
+
+    // read items
+    printf("reading item matrix from %s ...\n", item_path);
+    c_data* items = new c_data(); 
+    items->read_data(item_path);
+    int num_items = (int)items->m_vec_data.size();
+
+    // create model instance
+    c_ctr* ctr = new c_ctr();
+    ctr->set_model_parameters(num_factors, num_users, num_items);
+
+    c_corpus* c = NULL;
+    if (mult_path != NULL) {
+      // read word data
+      c = new c_corpus();
+      c->read_data(mult_path);
+      ctr->read_init_information(theta_init_path, beta_init_path, c, alpha_smooth);
     }
-    if (!file_exists(beta_init_path)) {
-      printf("topic distributions file %s doesn't exist! quit ...\n", beta_init_path);
-      exit(-1);
+
+    vector <c_corpus*> test_c = NULL;
+    for (int j = 0; j < test_path.size(); j++) {
+      c_corpus* tmp_c = new c_corpus();
+      tmp->read_data(test_path[j]);
+      test_c.push_back(tmp);
     }
-    printf("topic distributions file: %s\n", beta_init_path);
-    if (theta_opt) printf("theta optimization: True\n");
-    else printf("theta optimization: false\n");
-  }
-  else if (theta_opt) {
-    printf("theta optimization: false");
-    printf("(theta_opt has no effect, back to default value: false)\n");
-    theta_opt = 0;
-  }
 
-  printf("\n");
+    if (learning_rate <= 0) {
+      ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory);
+    } else {
+      ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory);
+    }
 
-  /// save the settings
-  int ctr_run = 1;
-  if (mult_path == NULL) ctr_run = 0;
-  ctr_hyperparameter ctr_param;
-  ctr_param.set(a, b, lambda_u, lambda_v, learning_rate, alpha_smooth,
-      random_seed, max_iter, save_lag, theta_opt, ctr_run, lda_regression);
-  sprintf(filename, "%s/settings.txt", directory); 
-  ctr_param.save(filename);
-  
-  /// init random numbe generator
-  RANDOM_NUMBER = new_random_number_generator(random_seed);
+    free_random_number_generator(RANDOM_NUMBER);
+    if (c != NULL) delete c;
 
-  // read users
-  printf("reading user matrix from %s ...\n", user_path);
-  c_data* users = new c_data(); 
-  users->read_data(user_path);
-  int num_users = (int)users->m_vec_data.size();
-
-  // read items
-  printf("reading item matrix from %s ...\n", item_path);
-  c_data* items = new c_data(); 
-  items->read_data(item_path);
-  int num_items = (int)items->m_vec_data.size();
-
-  // create model instance
-  c_ctr* ctr = new c_ctr();
-  ctr->set_model_parameters(num_factors, num_users, num_items);
-
-  c_corpus* c = NULL;
-  if (mult_path != NULL) {
-    // read word data
-    c = new c_corpus();
-    c->read_data(mult_path);
-    ctr->read_init_information(theta_init_path, beta_init_path, c, alpha_smooth);
-  }
-
-  if (learning_rate <= 0) {
-    ctr->learn_map_estimate(users, items, c, &ctr_param, directory);
-  } else {
-    ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory);
-  }
-
-  free_random_number_generator(RANDOM_NUMBER);
-  if (c != NULL) delete c;
-
-  delete ctr;
-  delete users;
-  delete items;
-  return 0;
+    delete ctr;
+    delete users;
+    delete items;
+    return 0;
+    }
 }
