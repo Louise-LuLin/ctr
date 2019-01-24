@@ -3,6 +3,7 @@
 #include <string>
 #include <getopt.h>
 #include <vector>
+#include <sstream>
 #include "ctr.h"
 
 using namespace std; 
@@ -193,7 +194,7 @@ int main(int argc, char* argv[]) {
     /// print information
     printf("\n******************** Fold %d in %s coldstart ******************\n", i, cold);
     std::vector<std::string> test_path; 
-    std::string test = "";
+    std::stringstream test;
 
     if (crossV == 1) {
       sprintf(directory, "%s/output/%s/byUser_20k_review", prefix, source);
@@ -214,12 +215,12 @@ int main(int argc, char* argv[]) {
 
       if (strcmp(cold, "true") == 0) {
         for (int j = 0; j < 3; j++) {
-          sprintf(test, "%s/%s/byUser_20k_review/CTR/test_%s_%d_%d.txt", prefix, source, cold, i, j);
-          test_path.push_back(test); 
+          test << prefix << "/" << source << "/byUser_20k_review/CTR/test_" << cold << "_" << i << "_" << j << ".txt";
+          test_path.push_back(test.str()); 
         }
       } else {
-        sprintf(test, "%s/%s/byUser_20k_review/CTR/test_%s_%d.txt", prefix, source, cold, i);
-        test_path.push_back(test); 
+        test << prefix << "/" << source << "/byUser_20k_review/CTR/test_" << cold << "_" << i << ".txt";
+        test_path.push_back(test.str()); 
       }
     }
     
