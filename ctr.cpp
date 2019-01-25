@@ -686,7 +686,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           gsl_vector_memcpy(x, &v.vector);
           gsl_vector_sub(x, &theta_v.vector);
           gsl_blas_ddot(x, x, &result);
-          likelihood += -0.5 * param->lambda_v * result;
+          // likelihood += -0.5 * param->lambda_v * result;
           
           if (param->ctr_run && param->theta_opt) {
             const c_document* doc =  test_c[test_idx]->m_docs[j];
