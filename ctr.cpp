@@ -296,15 +296,19 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
         if (m>0) {
           // m > 0, some users have rated this article
           const c_document* doc =  c->m_docs[j];
-          likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
-          optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+          if (doc->m_length > 0) {
+            likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
+            optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+          }
         }
         else {
         // m=0, this article has never been rated
           const c_document* doc =  c->m_docs[j];
-          doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
-          vnormalize(gamma);
-          gsl_vector_memcpy(&theta_v.vector, gamma);
+          if (doc->m_length > 0) {
+            doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
+            vnormalize(gamma);
+            gsl_vector_memcpy(&theta_v.vector, gamma);
+          }
         }
       }
       gsl_matrix_memcpy(m_beta, word_ss);
@@ -328,54 +332,54 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
     printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f\n", iter, elapsed, likelihood, converge);
 
     // save intermediate results
-    if (iter % param->save_lag == 0) {
+    // if (iter % param->save_lag == 0) {
 
-      sprintf(name, "%s/%04d-U.dat", directory, iter);
-      FILE * file_U = fopen(name, "w");
-      gsl_matrix_fwrite(file_U, m_U);
-      fclose(file_U);
+    //   sprintf(name, "%s/%04d-U.dat", directory, iter);
+    //   FILE * file_U = fopen(name, "w");
+    //   gsl_matrix_fwrite(file_U, m_U);
+    //   fclose(file_U);
 
-      sprintf(name, "%s/%04d-V.dat", directory, iter);
-      FILE * file_V = fopen(name, "w");
-      gsl_matrix_fwrite(file_V, m_V);
-      fclose(file_V);
+    //   sprintf(name, "%s/%04d-V.dat", directory, iter);
+    //   FILE * file_V = fopen(name, "w");
+    //   gsl_matrix_fwrite(file_V, m_V);
+    //   fclose(file_V);
 
-      if (param->ctr_run && param->theta_opt) { 
-        sprintf(name, "%s/%04d-theta.dat", directory, iter);
-        FILE * file_theta = fopen(name, "w");
-        gsl_matrix_fwrite(file_theta, m_theta);
-        fclose(file_theta);
+    //   if (param->ctr_run && param->theta_opt) { 
+    //     sprintf(name, "%s/%04d-theta.dat", directory, iter);
+    //     FILE * file_theta = fopen(name, "w");
+    //     gsl_matrix_fwrite(file_theta, m_theta);
+    //     fclose(file_theta);
 
-        sprintf(name, "%s/%04d-beta.dat", directory, iter);
-        FILE * file_beta = fopen(name, "w");
-        gsl_matrix_fwrite(file_beta, m_beta);
-        fclose(file_beta);
-      }
-    }
+    //     sprintf(name, "%s/%04d-beta.dat", directory, iter);
+    //     FILE * file_beta = fopen(name, "w");
+    //     gsl_matrix_fwrite(file_beta, m_beta);
+    //     fclose(file_beta);
+    //   }
+    // }
   }
 
   // save final results
-  sprintf(name, "%s/final-U.dat", directory);
-  FILE * file_U = fopen(name, "w");
-  gsl_matrix_fwrite(file_U, m_U);
-  fclose(file_U);
+  // sprintf(name, "%s/final-U.dat", directory);
+  // FILE * file_U = fopen(name, "w");
+  // gsl_matrix_fwrite(file_U, m_U);
+  // fclose(file_U);
 
-  sprintf(name, "%s/final-V.dat", directory);
-  FILE * file_V = fopen(name, "w");
-  gsl_matrix_fwrite(file_V, m_V);
-  fclose(file_V);
+  // sprintf(name, "%s/final-V.dat", directory);
+  // FILE * file_V = fopen(name, "w");
+  // gsl_matrix_fwrite(file_V, m_V);
+  // fclose(file_V);
 
-  if (param->ctr_run && param->theta_opt) { 
-    sprintf(name, "%s/final-theta.dat", directory);
-    FILE * file_theta = fopen(name, "w");
-    gsl_matrix_fwrite(file_theta, m_theta);
-    fclose(file_theta);
+  // if (param->ctr_run && param->theta_opt) { 
+  //   sprintf(name, "%s/final-theta.dat", directory);
+  //   FILE * file_theta = fopen(name, "w");
+  //   gsl_matrix_fwrite(file_theta, m_theta);
+  //   fclose(file_theta);
 
-    sprintf(name, "%s/final-beta.dat", directory);
-    FILE * file_beta = fopen(name, "w");
-    gsl_matrix_fwrite(file_beta, m_beta);
-    fclose(file_beta);
-  }
+  //   sprintf(name, "%s/final-beta.dat", directory);
+  //   FILE * file_beta = fopen(name, "w");
+  //   gsl_matrix_fwrite(file_beta, m_beta);
+  //   fclose(file_beta);
+  // }
 
   // free memory
   gsl_vector_free(x);
@@ -391,7 +395,8 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
 }
 
 void c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
-                               const c_corpus* c, const ctr_hyperparameter* param,
+                               const c_corpus* c, const vector <c_corpus*> test_c,
+                               const ctr_hyperparameter* param,
                                const char* directory) {
   // init model parameters
   printf("\ninitializing the model ...\n");
@@ -410,9 +415,9 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   double converge = 1.0;
 
   /// create the state log file 
-  sprintf(name, "%s/state.log", directory);
-  FILE* file = fopen(name, "w");
-  fprintf(file, "iter time likelihood converge\n");
+  // sprintf(name, "%s/state.log", directory);
+  // FILE* file = fopen(name, "w");
+  // fprintf(file, "iter time likelihood converge\n");
 
 
   /* alloc auxiliary variables */
@@ -446,7 +451,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   /// confidence parameters
   double a_minus_b = param->a - param->b;
 
-  while ((iter < param->max_iter and converge > 1e-4 ) or iter < min_iter) {
+  while (iter < param->max_iter) {
 
     likelihood_old = likelihood;
     likelihood = 0.0;
@@ -547,17 +552,21 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         
         if (param->ctr_run && param->theta_opt) {
           const c_document* doc =  c->m_docs[j];
-          likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
-          optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+          if (doc->m_length > 0) {
+            likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
+            optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+          }
         }
       }
       else {
       // m=0, this article has never been rated
         if (param->ctr_run && param->theta_opt) {
           const c_document* doc =  c->m_docs[j];
-          doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
-          vnormalize(gamma);
-          gsl_vector_memcpy(&theta_v.vector, gamma);
+          if (doc->m_length > 0) {
+            doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
+            vnormalize(gamma);
+            gsl_vector_memcpy(&theta_v.vector, gamma);
+          }
         }
       }
     }
@@ -581,58 +590,134 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
     if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
-    fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
-    fflush(file);
-    printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f\n", iter, elapsed, likelihood, converge);
+    // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
+    // fflush(file);
+    printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
+      iter, elapsed, likelihood, converge, exp(-likelihood/c->m_num_total_words));
 
     // save intermediate results
-    if (iter % param->save_lag == 0) {
+    // if (iter % param->save_lag == 0) {
 
-      sprintf(name, "%s/%04d-U.dat", directory, iter);
-      FILE * file_U = fopen(name, "w");
-      mtx_fprintf(file_U, m_U);
-      fclose(file_U);
+    //   sprintf(name, "%s/%04d-U.dat", directory, iter);
+    //   FILE * file_U = fopen(name, "w");
+    //   mtx_fprintf(file_U, m_U);
+    //   fclose(file_U);
 
-      sprintf(name, "%s/%04d-V.dat", directory, iter);
-      FILE * file_V = fopen(name, "w");
-      mtx_fprintf(file_V, m_V);
-      fclose(file_V);
+    //   sprintf(name, "%s/%04d-V.dat", directory, iter);
+    //   FILE * file_V = fopen(name, "w");
+    //   mtx_fprintf(file_V, m_V);
+    //   fclose(file_V);
 
-      if (param->ctr_run) { 
-        sprintf(name, "%s/%04d-theta.dat", directory, iter);
-        FILE * file_theta = fopen(name, "w");
-        mtx_fprintf(file_theta, m_theta);
-        fclose(file_theta);
+    //   if (param->ctr_run) { 
+    //     sprintf(name, "%s/%04d-theta.dat", directory, iter);
+    //     FILE * file_theta = fopen(name, "w");
+    //     mtx_fprintf(file_theta, m_theta);
+    //     fclose(file_theta);
 
-        sprintf(name, "%s/%04d-beta.dat", directory, iter);
-        FILE * file_beta = fopen(name, "w");
-        mtx_fprintf(file_beta, m_beta);
-        fclose(file_beta);
-      }
-    }
+    //     sprintf(name, "%s/%04d-beta.dat", directory, iter);
+    //     FILE * file_beta = fopen(name, "w");
+    //     mtx_fprintf(file_beta, m_beta);
+    //     fclose(file_beta);
+    //   }
+    // }
   }
 
   // save final results
-  sprintf(name, "%s/final-U.dat", directory);
-  FILE * file_U = fopen(name, "w");
-  mtx_fprintf(file_U, m_U);
-  fclose(file_U);
+  // if (!strcmp(directory, "")) {
+  //   sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, num_factors);
+  //   FILE * file_U = fopen(name, "w");
+  //   fprintf(file_U, "%d\t%d\n", m_num_users, num_factors);
+  //   for (i = 0; i < m_num_users; i++)
+  //   {
+  //     fprintf(file_U, "%s", corp->rUserIds[u].c_str());
+  //     for (j = 0; j < num_factors; j++)
+  //       fprintf(file_U, "\t%f", m_U[i][j]);
+  //     fprintf(file_U, "\n");
+  //   }
+  //   fclose(file_U);
+  // }
 
-  sprintf(name, "%s/final-V.dat", directory);
-  FILE * file_V = fopen(name, "w");
-  mtx_fprintf(file_V, m_V);
-  fclose(file_V);
+  // sprintf(name, "%s/final-V.dat", directory);
+  // FILE * file_V = fopen(name, "w");
+  // mtx_fprintf(file_V, m_V);
+  // fclose(file_V);
 
-  if (param->ctr_run) { 
-    sprintf(name, "%s/final-theta.dat", directory);
-    FILE * file_theta = fopen(name, "w");
-    mtx_fprintf(file_theta, m_theta);
-    fclose(file_theta);
+  // if (param->ctr_run) { 
+  //   sprintf(name, "%s/final-theta.dat", directory);
+  //   FILE * file_theta = fopen(name, "w");
+  //   mtx_fprintf(file_theta, m_theta);
+  //   fclose(file_theta);
 
-    sprintf(name, "%s/final-beta.dat", directory);
-    FILE * file_beta = fopen(name, "w");
-    mtx_fprintf(file_beta, m_beta);
-    fclose(file_beta);
+  //   sprintf(name, "%s/final-beta.dat", directory);
+  //   FILE * file_beta = fopen(name, "w");
+  //   mtx_fprintf(file_beta, m_beta);
+  //   fclose(file_beta);
+  // }
+
+  //test
+  likelihood = -exp(50);
+  converge = 1.0;
+  for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
+    printf("==== part %d in %d ====\n", test_idx, test_c.size());
+    iter = 0;
+    while (iter < 10) {
+      likelihood_old = likelihood;
+      likelihood = 0.0;
+
+      for (j = 0; j < m_num_items; j ++) {
+        gsl_vector_view v = gsl_matrix_row(m_V, j);
+        gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
+
+        user_ids = items->m_vec_data[j];
+        m = items->m_vec_len[j];
+        if (m>0) {
+          // m > 0, some users have rated this article
+          // update the likelihood for the relevant part
+          // likelihood += -0.5 * m * param->a;
+          for (l = 0; l < m; l ++) {
+            i = user_ids[l];
+            gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
+            gsl_blas_ddot(&u.vector, &v.vector, &result);
+            // likelihood += param->a * result;
+          }
+          // likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
+          // likelihood part of theta, even when theta=0, which is a
+          // special case
+          gsl_vector_memcpy(x, &v.vector);
+          gsl_vector_sub(x, &theta_v.vector);
+          gsl_blas_ddot(x, x, &result);
+          likelihood += -0.5 * param->lambda_v * result;
+          
+          if (param->ctr_run && param->theta_opt) {
+            const c_document* doc =  test_c[test_idx]->m_docs[j];
+            if (doc->m_length > 0) {
+              likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
+              optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+            }
+          }
+        } else {
+        // m=0, this article has never been rated
+          if (param->ctr_run && param->theta_opt) {
+            const c_document* doc =  test_c[test_idx]->m_docs[j];
+            if (doc->m_length > 0) {
+              likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
+              vnormalize(gamma);
+              gsl_vector_memcpy(&theta_v.vector, gamma);
+            }
+          }
+        }        
+      }
+
+      iter++;
+      
+      if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
+
+      // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
+      // fflush(file);
+      printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
+        iter, likelihood, test_c[test_idx]->m_num_total_words, exp(-likelihood/test_c[test_idx]->m_num_total_words));
+
+    }
   }
 
   // free memory
