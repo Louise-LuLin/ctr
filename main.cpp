@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
 
   for (int cv_i = 0; cv_i < crossV; cv_i++) {
     /// print information
-    printf("\n******************** Fold %d in %s coldstart ******************\n", cv_i, cold.c_str());
+    printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
     std::vector<std::string> test_path; 
     std::stringstream test;
 
@@ -266,5 +266,7 @@ int main(int argc, char* argv[]) {
     delete users;
     delete items;
     return 0;
+
+    printf("\n===== Fold %d in %d, %s coldstart =====\n", cv_i, crossV, cold.c_str());
   }
 }
