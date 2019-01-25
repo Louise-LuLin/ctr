@@ -255,9 +255,12 @@ int main(int argc, char* argv[]) {
 
     if (learning_rate <= 0) {
       ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
+      printf("point 2\n");
     } else {
       ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
     }
+
+    printf("point 3\n");
 
     free_random_number_generator(RANDOM_NUMBER);
     if (c != NULL) delete c;

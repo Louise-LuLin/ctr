@@ -660,9 +660,61 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
     printf("==== part %d in %d ====\n", test_idx, test_c.size());
     iter = 0;
-    while (iter < 20) {
+    while (iter < 3) {
       likelihood_old = likelihood;
       likelihood = 0.0;
+
+      // update U
+      gsl_matrix_set_zero(XX);
+      for (j = 0; j < m_num_items; j ++) {
+        m = items->m_vec_len[j];
+        if (m>0) {
+          gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
+          gsl_blas_dger(1.0, &v.vector, &v.vector, XX);
+        }
+      }
+      gsl_matrix_scale(XX, param->b);
+      // this is only for U
+      gsl_matrix_add_diagonal(XX, param->lambda_u); 
+
+      for (i = 0; i < m_num_users; i ++) {
+        item_ids = users->m_vec_data[i];
+        n = users->m_vec_len[i];
+        if (n > 0) {
+          // this user has rated some articles
+          gsl_matrix_memcpy(A, XX);
+          gsl_vector_set_zero(x);
+          for (l=0; l < n; l ++) {
+            j = item_ids[l];
+            gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
+            gsl_blas_dger(a_minus_b, &v.vector, &v.vector, A); 
+            gsl_blas_daxpy(param->a, &v.vector, x);
+          }
+
+          gsl_vector_view u = gsl_matrix_row(m_U, i);
+          matrix_vector_solve(A, x, &(u.vector));
+
+          // update the likelihood
+          gsl_blas_ddot(&u.vector, &u.vector, &result);
+          likelihood += -0.5 * param->lambda_u * result;
+        }
+      }
+      
+      if (param->lda_regression) break; // one iteration is enough for lda-regression
+
+      // update V
+      if (param->ctr_run && param->theta_opt) gsl_matrix_set_zero(word_ss);
+
+      gsl_matrix_set_zero(XX);
+      for (i = 0; i < m_num_users; i ++) {
+        n = users->m_vec_len[i]; 
+        if (n>0) {
+          gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);
+          gsl_blas_dger(1.0, &u.vector, &u.vector, XX);
+        }
+      }
+      gsl_matrix_scale(XX, param->b);
+
 
       for (j = 0; j < m_num_items; j ++) {
         gsl_vector_view v = gsl_matrix_row(m_V, j);
@@ -672,21 +724,41 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         m = items->m_vec_len[j];
         if (m>0) {
           // m > 0, some users have rated this article
+                  // m > 0, some users have rated this article
+          gsl_matrix_memcpy(A, XX);
+          gsl_vector_set_zero(x);
+          for (l = 0; l < m; l ++) {
+            i = user_ids[l];
+            gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
+            gsl_blas_dger(a_minus_b, &u.vector, &u.vector, A);
+            gsl_blas_daxpy(param->a, &u.vector, x);
+          }
+
+          // adding the topic vector
+          // even when ctr_run=0, m_theta=0
+          gsl_blas_daxpy(param->lambda_v, &theta_v.vector, x);
+          
+          gsl_matrix_memcpy(B, A); // save for computing likelihood 
+
+          // here different from U update
+          gsl_matrix_add_diagonal(A, param->lambda_v);  
+          matrix_vector_solve(A, x, &v.vector);
+
           // update the likelihood for the relevant part
-          // likelihood += -0.5 * m * param->a;
+          likelihood += -0.5 * m * param->a;
           for (l = 0; l < m; l ++) {
             i = user_ids[l];
             gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
             gsl_blas_ddot(&u.vector, &v.vector, &result);
             // likelihood += param->a * result;
           }
-          // likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
+          likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
           // likelihood part of theta, even when theta=0, which is a
           // special case
           gsl_vector_memcpy(x, &v.vector);
           gsl_vector_sub(x, &theta_v.vector);
           gsl_blas_ddot(x, x, &result);
-          // likelihood += -0.5 * param->lambda_v * result;
+          likelihood += -0.5 * param->lambda_v * result;
           
           if (param->ctr_run && param->theta_opt) {
             const c_document* doc =  test_c[test_idx]->m_docs[j];
@@ -718,6 +790,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         iter, likelihood, test_c[test_idx]->m_num_total_words, exp(-likelihood/test_c[test_idx]->m_num_total_words));
 
     }
+    printf("print 0\n");
   }
 
   // free memory
