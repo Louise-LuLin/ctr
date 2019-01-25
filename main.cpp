@@ -229,9 +229,9 @@ int main(int argc, char* argv[]) {
 
     if (crossV == 1) {
       directory = prefix + "/output/" + source + "/byUser_20k_review";
-      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user.txt";
-      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item.txt";
-      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus.txt";
+      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_false_0.txt";
+      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_false_0.txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false_0.txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
