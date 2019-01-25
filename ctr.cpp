@@ -758,7 +758,7 @@ double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v,
     for (k = 0; k < m_num_factors; k ++) {
       x = mget(phi, n, k);
       if (x > 0) 
-        likelihood += x*(vget(log_theta_v, k) + mget(log_beta, k, w) - log(x));
+        likelihood += doc->m_counts[n] *x*(vget(log_theta_v, k) + mget(log_beta, k, w) - log(x));
     }
   }
 
