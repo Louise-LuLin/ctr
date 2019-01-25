@@ -664,14 +664,14 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         if (m>0) {
           // m > 0, some users have rated this article
           // update the likelihood for the relevant part
-          likelihood += -0.5 * m * param->a;
+          // likelihood += -0.5 * m * param->a;
           for (l = 0; l < m; l ++) {
             i = user_ids[l];
             gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
             gsl_blas_ddot(&u.vector, &v.vector, &result);
-            likelihood += param->a * result;
+            // likelihood += param->a * result;
           }
-          likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
+          // likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
           // likelihood part of theta, even when theta=0, which is a
           // special case
           gsl_vector_memcpy(x, &v.vector);
