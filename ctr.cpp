@@ -394,7 +394,7 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
   }
 }
 
-void c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
+double c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
                                const c_corpus* c, const vector <c_corpus*> test_c,
                                const ctr_hyperparameter* param,
                                const char* directory) {
@@ -655,11 +655,12 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   // }
 
   //test
-  likelihood = -exp(50);
-  converge = 1.0;
   for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
     printf("==== part %d in %d ====\n", test_idx, test_c.size());
+    likelihood = -exp(50);
+    converge = 1.0;
     iter = 0;
+
     while (iter < 3) {
       likelihood_old = likelihood;
       likelihood = 0.0;
@@ -715,7 +716,6 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       }
       gsl_matrix_scale(XX, param->b);
 
-
       for (j = 0; j < m_num_items; j ++) {
         gsl_vector_view v = gsl_matrix_row(m_V, j);
         gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
@@ -724,7 +724,6 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
         m = items->m_vec_len[j];
         if (m>0) {
           // m > 0, some users have rated this article
-                  // m > 0, some users have rated this article
           gsl_matrix_memcpy(A, XX);
           gsl_vector_set_zero(x);
           for (l = 0; l < m; l ++) {
@@ -750,7 +749,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
             i = user_ids[l];
             gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
             gsl_blas_ddot(&u.vector, &v.vector, &result);
-            // likelihood += param->a * result;
+            likelihood += param->a * result;
           }
           likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
           // likelihood part of theta, even when theta=0, which is a
@@ -761,36 +760,51 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
           likelihood += -0.5 * param->lambda_v * result;
           
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[test_idx]->m_docs[j];
+            const c_document* doc =  c->m_docs[j];
             if (doc->m_length > 0) {
               likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
               optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
             }
           }
-        } else {
+        }
+        else {
         // m=0, this article has never been rated
           if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[test_idx]->m_docs[j];
+            const c_document* doc =  c->m_docs[j];
             if (doc->m_length > 0) {
-              likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
+              doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
               vnormalize(gamma);
               gsl_vector_memcpy(&theta_v.vector, gamma);
             }
           }
-        }        
+        }
       }
 
+      // update beta if needed
+      if (param->ctr_run && param->theta_opt) {
+          gsl_matrix_memcpy(m_beta, word_ss);
+          for (k = 0; k < m_num_factors; k ++) {
+            gsl_vector_view row = gsl_matrix_row(m_beta, k);
+            vnormalize(&row.vector);
+          }
+          gsl_matrix_memcpy(log_beta, m_beta);
+          mtx_log(log_beta);
+      }
+
+      time(&current);
+      elapsed = (int)difftime(current, start);
+
       iter++;
-      
+      converge = fabs((likelihood-likelihood_old)/likelihood_old);
+
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
       // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
       // fflush(file);
-      printf("iter=%04d, likelihood=%.5f, wordcount=%d, perplexity=%.5f\n", 
-        iter, likelihood, test_c[test_idx]->m_num_total_words, exp(-likelihood/test_c[test_idx]->m_num_total_words));
+      printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
+        iter, elapsed, likelihood, converge, exp(-likelihood/c->m_num_total_words));
 
     }
-    printf("print 0\n");
   }
 
   // free memory

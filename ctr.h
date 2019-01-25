@@ -65,7 +65,7 @@ public:
                             int num_users, 
                             int num_items);
 
-  void learn_map_estimate(const c_data* users, const c_data* items, 
+  double learn_map_estimate(const c_data* users, const c_data* items, 
                           const c_corpus* c, const vector <c_corpus*> test_c, const ctr_hyperparameter* param,
                           const char* directory);
 

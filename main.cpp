@@ -114,6 +114,7 @@ int main(int argc, char* argv[]) {
     ++i;
   };
 
+  std::vector<double> perp;
   for (int cv_i = 0; cv_i < crossV; cv_i++) {
     /// print information
     printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
@@ -255,12 +256,9 @@ int main(int argc, char* argv[]) {
 
     if (learning_rate <= 0) {
       ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
-      printf("point 2\n");
     } else {
       ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
     }
-
-    printf("point 3\n");
 
     free_random_number_generator(RANDOM_NUMBER);
     if (c != NULL) delete c;
@@ -268,8 +266,8 @@ int main(int argc, char* argv[]) {
     delete ctr;
     delete users;
     delete items;
-    return 0;
-
-    printf("\n===== Fold %d in %d, %s coldstart =====\n", cv_i, crossV, cold.c_str());
+    
   }
+
+
 }
