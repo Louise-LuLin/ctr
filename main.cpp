@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     /// print information
     printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
     std::vector<std::string> test_path; 
-    std::stringstream test;
+    string test;
     string userId_path;
     string itemId_path;
 
@@ -142,11 +142,11 @@ int main(int argc, char* argv[]) {
 
       if (strcmp(cold.c_str(), "true") == 0) {
         for (int j = 0; j < 3; j++) {
-          test << prefix << "/" << source << "/byUser_20k_review/CTR/test_" << cold << "_" << cv_i << "_" << j << ".txt";
+          test = prefix + "/" + source + "/byUser_20k_review/CTR/test_" + cold + "_" + std::to_string(cv_i) + "_" + std::to_string(j) + ".txt";
           test_path.push_back(test.str()); 
         }
       } else {
-        test << prefix << "/" << source << "/byUser_20k_review/CTR/test_" << cold << "_" << cv_i << ".txt";
+        test = prefix + "/" + source + "/byUser_20k_review/CTR/test_" + cold + "_" + std::to_string(cv_i) + ".txt";
         test_path.push_back(test.str()); 
       }
     }
