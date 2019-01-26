@@ -255,17 +255,16 @@ int main(int argc, char* argv[]) {
       ctr->read_init_information(theta_init_path.c_str(), beta_init_path.c_str(), c, alpha_smooth);
     }
 
-    vector<c_corpus*> test_c;
-    for (int j = 0; j < test_path.size(); j++) {
-      c_corpus* tmp_c = new c_corpus();
-      tmp_c->read_data(test_path[j].c_str());
-      test_c.push_back(tmp_c);
-    }
-
     if (learning_rate <= 0) {
-      double* fold_perp = ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
+      ctr->learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
+
       for (int j = 0; j < test_path.size(); j++) {
-        perp[cv_i][j] = *(fold_perp+j);
+        printf("==== part %d in %d ====\n", j, test_path.size());
+        c_corpus* tmp_c = new c_corpus();
+        tmp_c->read_data(test_path[j].c_str());
+
+        double fold_perp = ctr->test_map_estimate(users, items, test_c, &ctr_param);
+        perp[cv_i][j] = fold_perp;
       }
     } else {
       ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());

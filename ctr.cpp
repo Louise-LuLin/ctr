@@ -63,6 +63,25 @@ void c_ctr::read_init_information(const char* theta_init_path,
   }
 }
 
+void c_ctr::init_theta(const char* theta_init_path, const c_corpus* c, double alpha_smooth) {
+  int num_topics = m_num_factors;
+  m_theta = gsl_matrix_alloc(c->m_num_docs, num_topics);
+  printf("\nreading theta initialization from %s\n", theta_init_path);
+  FILE * f = fopen(theta_init_path, "r");
+  mtx_fscanf(f, m_theta);
+  fclose(f);
+
+  //smoothing
+  gsl_matrix_add_constant(m_theta, alpha_smooth);
+
+  //normalize m_theta, in case it's not
+  for (size_t j = 0; j < m_theta->size1; j ++) {
+    gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
+    vnormalize(&theta_v.vector);
+  }
+
+}
+
 void c_ctr::set_model_parameters(int num_factors, 
                                  int num_users, 
                                  int num_items) {
@@ -394,8 +413,8 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
   }
 }
 
-double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
-                               const c_corpus* c, const vector <c_corpus*> test_c,
+void c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
+                               const c_corpus* c,
                                const ctr_hyperparameter* param,
                                const char* directory) {
   // init model parameters
@@ -595,47 +614,24 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
       iter, elapsed, likelihood, converge, exp(-likelihood/c->m_num_total_words));
 
-    // save intermediate results
-    // if (iter % param->save_lag == 0) {
-
-    //   sprintf(name, "%s/%04d-U.dat", directory, iter);
-    //   FILE * file_U = fopen(name, "w");
-    //   mtx_fprintf(file_U, m_U);
-    //   fclose(file_U);
-
-    //   sprintf(name, "%s/%04d-V.dat", directory, iter);
-    //   FILE * file_V = fopen(name, "w");
-    //   mtx_fprintf(file_V, m_V);
-    //   fclose(file_V);
-
-    //   if (param->ctr_run) { 
-    //     sprintf(name, "%s/%04d-theta.dat", directory, iter);
-    //     FILE * file_theta = fopen(name, "w");
-    //     mtx_fprintf(file_theta, m_theta);
-    //     fclose(file_theta);
-
-    //     sprintf(name, "%s/%04d-beta.dat", directory, iter);
-    //     FILE * file_beta = fopen(name, "w");
-    //     mtx_fprintf(file_beta, m_beta);
-    //     fclose(file_beta);
-    //   }
-    // }
   }
 
   // save final results
-  // if (!strcmp(directory, "")) {
-  //   sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
-  //   FILE * file_U = fopen(name, "w");
-  //   fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
-  //   for (i = 0; i < m_num_users; i++)
-  //   {
-  //     fprintf(file_U, "%s", users->m_vec_ids[i]);
-  //     for (j = 0; j < m_num_factors; j++)
-  //       fprintf(file_U, "\t%f", gsl_matrix_get(m_U, i, j));
-  //     fprintf(file_U, "\n");
-  //   }
-  //   fclose(file_U);
-  // }
+  if (!strcmp(directory, "")) {
+    sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
+    printf("point 0\n");
+    FILE * file_U = fopen(name, "w");
+    fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
+    for (i = 0; i < m_num_users; i++)
+    {
+      printf("%s\n", users->m_vec_ids[i]);
+      fprintf(file_U, "%s", users->m_vec_ids[i]);
+      for (j = 0; j < m_num_factors; j++)
+        fprintf(file_U, "\t%f", gsl_matrix_get(m_U, i, j));
+      fprintf(file_U, "\n");
+    }
+    fclose(file_U);
+  }
 
   // sprintf(name, "%s/final-V.dat", directory);
   // FILE * file_V = fopen(name, "w");
@@ -654,157 +650,219 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   //   fclose(file_beta);
   // }
 
+  // free memory
+  gsl_matrix_free(XX);
+  gsl_matrix_free(A);
+  gsl_matrix_free(B);
+  gsl_vector_free(x);
+
+  if (param->ctr_run && param->theta_opt) {
+    gsl_matrix_free(phi);
+    gsl_matrix_free(log_beta);
+    gsl_matrix_free(word_ss);
+    gsl_vector_free(gamma);
+  }
+}
+
+
+double c_ctr::test_map_estimate(const c_data* users, const c_data* items, 
+                               const c_corpus* test_c,
+                               const ctr_hyperparameter* param) {
+
+  // init model parameters
+  printf("\ninitializing the model ...\n");
+  init_model(param->ctr_run);
+
+  // filename
+  char name[500];
+
+  // start time
+  time_t start, current;
+  time(&start);
+  int elapsed = 0;
+
+  int iter = 0;
+  double likelihood = -exp(50), likelihood_old;
+  double converge = 1.0;
+
+  /// create the state log file 
+  // sprintf(name, "%s/state.log", directory);
+  // FILE* file = fopen(name, "w");
+  // fprintf(file, "iter time likelihood converge\n");
+
+
+  /* alloc auxiliary variables */
+  gsl_matrix* XX = gsl_matrix_alloc(m_num_factors, m_num_factors);
+  gsl_matrix* A  = gsl_matrix_alloc(m_num_factors, m_num_factors);
+  gsl_matrix* B  = gsl_matrix_alloc(m_num_factors, m_num_factors);
+  gsl_vector* x  = gsl_vector_alloc(m_num_factors);
+
+  gsl_matrix* phi = NULL;
+  gsl_matrix* word_ss = NULL;
+  gsl_matrix* log_beta = NULL;
+  gsl_vector* gamma = NULL;
+
+  if (param->ctr_run && param->theta_opt) {
+    int max_len = c->max_corpus_length();
+    phi = gsl_matrix_calloc(max_len, m_num_factors);
+    word_ss = gsl_matrix_calloc(m_num_factors, c->m_size_vocab);
+    log_beta = gsl_matrix_calloc(m_num_factors, c->m_size_vocab);
+    gsl_matrix_memcpy(log_beta, m_beta);
+    mtx_log(log_beta);
+    gamma = gsl_vector_alloc(m_num_factors);
+  }
+
+  /* tmp variables for indexes */
+  int i, j, m, n, l, k;
+  int* item_ids; 
+  int* user_ids;
+
+  double result;
+
+  /// confidence parameters
+  double a_minus_b = param->a - param->b;
+
   //test
   static double test_perp[3];
   double tmp_perp = 0;
-  for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
-    printf("==== part %d in %d ====\n", test_idx, test_c.size());
-    likelihood = -exp(50);
-    converge = 1.0;
-    iter = 0;
 
-    while (iter < 10) {
-      likelihood_old = likelihood;
-      likelihood = 0.0;
+  while (iter < 10) {
+    likelihood_old = likelihood;
+    likelihood = 0.0;
 
-      // part U
-      gsl_matrix_set_zero(XX);
-      for (j = 0; j < m_num_items; j ++) {
-        m = items->m_vec_len[j];
-        if (m>0) {
-          gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
-          gsl_blas_dger(1.0, &v.vector, &v.vector, XX);
-        }
+    // part U
+    gsl_matrix_set_zero(XX);
+    for (j = 0; j < m_num_items; j ++) {
+      m = items->m_vec_len[j];
+      if (m>0) {
+        gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
+        gsl_blas_dger(1.0, &v.vector, &v.vector, XX);
       }
-      gsl_matrix_scale(XX, param->b);
-      // this is only for U
-      gsl_matrix_add_diagonal(XX, param->lambda_u); 
-
-      for (i = 0; i < m_num_users; i ++) {
-        item_ids = users->m_vec_data[i];
-        n = users->m_vec_len[i];
-        if (n > 0) {
-          // this user has rated some articles
-          gsl_matrix_memcpy(A, XX);
-          gsl_vector_set_zero(x);
-          for (l=0; l < n; l ++) {
-            j = item_ids[l];
-            gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
-            gsl_blas_dger(a_minus_b, &v.vector, &v.vector, A); 
-            gsl_blas_daxpy(param->a, &v.vector, x);
-          }
-
-          gsl_vector_view u = gsl_matrix_row(m_U, i);
-          matrix_vector_solve(A, x, &(u.vector));
-
-          // update the likelihood
-          gsl_blas_ddot(&u.vector, &u.vector, &result);
-          likelihood += -0.5 * param->lambda_u * result;
-        }
-      }
-      
-      if (param->lda_regression) break; // one iteration is enough for lda-regression
-
-
-      // part V
-      if (param->ctr_run && param->theta_opt) gsl_matrix_set_zero(word_ss);
-
-      gsl_matrix_set_zero(XX);
-      for (i = 0; i < m_num_users; i ++) {
-        n = users->m_vec_len[i]; 
-        if (n>0) {
-          gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);
-          gsl_blas_dger(1.0, &u.vector, &u.vector, XX);
-        }
-      }
-      gsl_matrix_scale(XX, param->b);
-
-
-      for (j = 0; j < m_num_items; j ++) {
-        gsl_vector_view v = gsl_matrix_row(m_V, j);
-        gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
-
-        user_ids = items->m_vec_data[j];
-        m = items->m_vec_len[j];
-        if (m>0) {
-
-          // m > 0, some users have rated this article
-          gsl_matrix_memcpy(A, XX);
-          gsl_vector_set_zero(x);
-          for (l = 0; l < m; l ++) {
-            i = user_ids[l];
-            gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
-            gsl_blas_dger(a_minus_b, &u.vector, &u.vector, A);
-            gsl_blas_daxpy(param->a, &u.vector, x);
-          }
-
-          // adding the topic vector
-          // even when ctr_run=0, m_theta=0
-          gsl_blas_daxpy(param->lambda_v, &theta_v.vector, x);
-          
-          gsl_matrix_memcpy(B, A); // save for computing likelihood 
-
-          // here different from U update
-          gsl_matrix_add_diagonal(A, param->lambda_v);  
-          matrix_vector_solve(A, x, &v.vector);
-
-          // update the likelihood for the relevant part
-          likelihood += -0.5 * m * param->a;
-          for (l = 0; l < m; l ++) {
-            i = user_ids[l];
-            gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
-            gsl_blas_ddot(&u.vector, &v.vector, &result);
-            likelihood += param->a * result;
-          }
-          likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
-          // likelihood part of theta, even when theta=0, which is a
-          // special case
-          gsl_vector_memcpy(x, &v.vector);
-          gsl_vector_sub(x, &theta_v.vector);
-          gsl_blas_ddot(x, x, &result);
-          likelihood += -0.5 * param->lambda_v * result;
-
-          
-          if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[test_idx]->m_docs[j];
-            if (doc->m_length > 0) {
-              likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
-              optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
-            }
-          }
-        }
-        else {
-        // m=0, this article has never been rated
-          if (param->ctr_run && param->theta_opt) {
-            const c_document* doc =  test_c[test_idx]->m_docs[j];
-            if (doc->m_length > 0) {
-              doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
-              vnormalize(gamma);
-              gsl_vector_memcpy(&theta_v.vector, gamma);
-            }
-          }
-        }
-      }
-
-
-      time(&current);
-      elapsed = (int)difftime(current, start);
-
-      iter++;
-      converge = fabs((likelihood-likelihood_old)/likelihood_old);
-      tmp_perp = exp(-likelihood/test_c[test_idx]->m_num_total_words);
-
-      if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
-
-      // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
-      // fflush(file);
-      printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
-        iter, elapsed, likelihood, converge, tmp_perp);
-
-
     }
-    test_perp[test_idx] = tmp_perp;
-  }
+    gsl_matrix_scale(XX, param->b);
+    // this is only for U
+    gsl_matrix_add_diagonal(XX, param->lambda_u); 
+
+    for (i = 0; i < m_num_users; i ++) {
+      item_ids = users->m_vec_data[i];
+      n = users->m_vec_len[i];
+      if (n > 0) {
+        // this user has rated some articles
+        gsl_matrix_memcpy(A, XX);
+        gsl_vector_set_zero(x);
+        for (l=0; l < n; l ++) {
+          j = item_ids[l];
+          gsl_vector_const_view v = gsl_matrix_const_row(m_V, j); 
+          gsl_blas_dger(a_minus_b, &v.vector, &v.vector, A); 
+          gsl_blas_daxpy(param->a, &v.vector, x);
+        }
+
+        gsl_vector_view u = gsl_matrix_row(m_U, i);
+        // matrix_vector_solve(A, x, &(u.vector));
+
+        // update the likelihood
+        gsl_blas_ddot(&u.vector, &u.vector, &result);
+        likelihood += -0.5 * param->lambda_u * result;
+      }
+    }
+    
+    if (param->lda_regression) break; // one iteration is enough for lda-regression
+
+
+    // part V
+    if (param->ctr_run && param->theta_opt) gsl_matrix_set_zero(word_ss);
+
+    gsl_matrix_set_zero(XX);
+    for (i = 0; i < m_num_users; i ++) {
+      n = users->m_vec_len[i]; 
+      if (n>0) {
+        gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);
+        gsl_blas_dger(1.0, &u.vector, &u.vector, XX);
+      }
+    }
+    gsl_matrix_scale(XX, param->b);
+
+
+    for (j = 0; j < m_num_items; j ++) {
+      gsl_vector_view v = gsl_matrix_row(m_V, j);
+      gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
+
+      user_ids = items->m_vec_data[j];
+      m = items->m_vec_len[j];
+      if (m>0) {
+
+        // m > 0, some users have rated this article
+        gsl_matrix_memcpy(A, XX);
+        gsl_vector_set_zero(x);
+        for (l = 0; l < m; l ++) {
+          i = user_ids[l];
+          gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
+          gsl_blas_dger(a_minus_b, &u.vector, &u.vector, A);
+          gsl_blas_daxpy(param->a, &u.vector, x);
+        }
+
+        // adding the topic vector
+        // even when ctr_run=0, m_theta=0
+        gsl_blas_daxpy(param->lambda_v, &theta_v.vector, x);
+        
+        gsl_matrix_memcpy(B, A); // save for computing likelihood 
+
+        // here different from U update
+        gsl_matrix_add_diagonal(A, param->lambda_v);  
+        // matrix_vector_solve(A, x, &v.vector);
+
+        // update the likelihood for the relevant part
+        likelihood += -0.5 * m * param->a;
+        for (l = 0; l < m; l ++) {
+          i = user_ids[l];
+          gsl_vector_const_view u = gsl_matrix_const_row(m_U, i);  
+          gsl_blas_ddot(&u.vector, &v.vector, &result);
+          likelihood += param->a * result;
+        }
+        likelihood += -0.5 * mahalanobis_prod(B, &v.vector, &v.vector);
+        // likelihood part of theta, even when theta=0, which is a
+        // special case
+        gsl_vector_memcpy(x, &v.vector);
+        gsl_vector_sub(x, &theta_v.vector);
+        gsl_blas_ddot(x, x, &result);
+        likelihood += -0.5 * param->lambda_v * result;
+
+        
+        if (param->ctr_run && param->theta_opt) {
+          const c_document* doc =  test_c->m_docs[j];
+          if (doc->m_length > 0) {
+            likelihood += doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, true); 
+            optimize_simplex(gamma, &v.vector, param->lambda_v, &theta_v.vector); 
+          }
+        }
+      }
+      else {
+      // m=0, this article has never been rated
+        if (param->ctr_run && param->theta_opt) {
+          const c_document* doc =  test_c->m_docs[j];
+          if (doc->m_length > 0) {
+            doc_inference(doc, &theta_v.vector, log_beta, phi, gamma, word_ss, false); 
+            vnormalize(gamma);
+            gsl_vector_memcpy(&theta_v.vector, gamma);
+          }
+        }
+      }
+    }
+
+    time(&current);
+    elapsed = (int)difftime(current, start);
+
+    iter++;
+    converge = fabs((likelihood-likelihood_old)/likelihood_old);
+    tmp_perp = exp(-likelihood/test_c->m_num_total_words);
+
+    if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
+
+    // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
+    // fflush(file);
+    printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
+      iter, elapsed, likelihood, converge, tmp_perp);
+  }  
 
   // free memory
   gsl_matrix_free(XX);
@@ -819,8 +877,10 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     gsl_vector_free(gamma);
   }
 
-  return test_perp;
+  return tmp_perp;
 }
+
+
 
 double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v, 
                             const gsl_matrix* log_beta, gsl_matrix* phi,
