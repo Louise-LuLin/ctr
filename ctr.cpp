@@ -851,7 +851,7 @@ double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v,
   }
 
   if (pseudo_count > 0) {
-    likelihood += pseudo_count * vsum(log_theta_v);
+    // likelihood += pseudo_count * vsum(log_theta_v);
   }
 
   gsl_vector_set_all(gamma, pseudo_count); // smoothing with small pseudo counts
