@@ -288,7 +288,7 @@ int main(int argc, char* argv[]) {
     }
     mean = mean/crossV;
 
-    for (int j = 0; j < perp.size(); j++) {
+    for (int j = 0; j < crossV; j++) {
       var += (perp[j][i] - mean) * (perp[j][i] - mean);
     }
     var = sqrt(var/crossV);
