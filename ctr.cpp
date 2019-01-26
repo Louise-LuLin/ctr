@@ -827,7 +827,7 @@ double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v,
                             gsl_vector* gamma, gsl_matrix* word_ss, 
                             bool update_word_ss) {
 
-  double pseudo_count = 1.0;
+  double pseudo_count = 0.001;
   double likelihood = 0;
   gsl_vector* log_theta_v = gsl_vector_alloc(theta_v->size);
   gsl_vector_memcpy(log_theta_v, theta_v);
@@ -851,7 +851,7 @@ double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v,
   }
 
   if (pseudo_count > 0) {
-    // likelihood += pseudo_count * vsum(log_theta_v);
+    likelihood += pseudo_count * vsum(log_theta_v);
   }
 
   gsl_vector_set_all(gamma, pseudo_count); // smoothing with small pseudo counts
