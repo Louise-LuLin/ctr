@@ -115,7 +115,6 @@ int main(int argc, char* argv[]) {
   };
 
   std::vector<double*> perp;
-  double* fold_perp;
   for (int cv_i = 0; cv_i < crossV; cv_i++) {
     /// print information
     printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
@@ -126,14 +125,14 @@ int main(int argc, char* argv[]) {
       directory = prefix + "/output/" + source + "/byUser_20k_review";
       user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_false_0.txt";
       item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_false_0.txt";
-      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false_0.txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false.txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
       directory = "";
       user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_" + cold + "_" + std::to_string(cv_i) + ".txt";
       item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_" + cold + "_" + std::to_string(cv_i) + ".txt";
-      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_" + cold + "_" + std::to_string(cv_i) + ".txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/train_" + cold + "_" + std::to_string(cv_i) + ".txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(cv_i) + "_" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + cold + "_fold" + std::to_string(cv_i) + "_" + std::to_string(num_factors) + ".topics";
 
@@ -256,7 +255,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (learning_rate <= 0) {
-      fold_perp = ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
+      double* fold_perp = ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
       perp.push_back(fold_perp);
     } else {
       ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
