@@ -785,7 +785,7 @@ double c_ctr::test_map_estimate(const c_data* users, const c_data* items,
 
     for (j = 0; j < m_num_items; j ++) {
       gsl_vector_view v = gsl_matrix_row(m_V, j);
-      gsl_vector_view theta_v = gsl_matrix_row(m_theta, j);
+      gsl_vector_view theta_v = gsl_matrix_row(m_V, j);
 
       user_ids = items->m_vec_data[j];
       m = items->m_vec_len[j];
