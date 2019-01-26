@@ -47,7 +47,7 @@ void c_data::read_ids(const char * data_filename) {
   fileptr = fopen(data_filename, "r");
 
   while ((fscanf(fileptr, "%10d", &index) != EOF)) {
-    char* id;
+    char* id = (char *) malloc(sizeof(char) * 100);
     fscanf(fileptr, "%s", &id);
     m_vec_ids.push_back(id);
   }
