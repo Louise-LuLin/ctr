@@ -280,8 +280,10 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < test_num; i++) {
     mean = 0;
     var = 0;
+    printf("===== part %d =====\n", i);
     for (int j = 0; j < perp.size(); j++) {
       mean += *(perp[j]+i);
+      printf("fold %d perplexity: %f\n", j, *(perp[j]+i));
     }
     if(perp.size() > 0)
       mean = mean/perp.size();
