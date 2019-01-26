@@ -72,7 +72,7 @@ public:
                           const char* directory);
 
   double test_map_estimate(const c_data* users, const c_data* items, 
-                               const vector <c_corpus*> test_c,
+                               const c_corpus* test_c,
                                const ctr_hyperparameter* param);
 
   void stochastic_learn_map_estimate(const c_data* users, const c_data* items, 
