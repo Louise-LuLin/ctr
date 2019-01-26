@@ -663,7 +663,7 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     converge = 1.0;
     iter = 0;
 
-    while (iter < 3) {
+    while (iter < 10) {
       likelihood_old = likelihood;
       likelihood = 0.0;
 
