@@ -623,19 +623,19 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   }
 
   // save final results
-  if (!strcmp(directory, "")) {
-    sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
-    FILE * file_U = fopen(name, "w");
-    fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
-    for (i = 0; i < m_num_users; i++)
-    {
-      fprintf(file_U, "%s", corp->rUserIds[u].c_str());
-      for (j = 0; j < m_num_factors; j++)
-        fprintf(file_U, "\t%f", m_U[i][j]);
-      fprintf(file_U, "\n");
-    }
-    fclose(file_U);
-  }
+  // if (!strcmp(directory, "")) {
+  //   sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
+  //   FILE * file_U = fopen(name, "w");
+  //   fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
+  //   for (i = 0; i < m_num_users; i++)
+  //   {
+  //     fprintf(file_U, "%s", corp->rUserIds[u].c_str());
+  //     for (j = 0; j < m_num_factors; j++)
+  //       fprintf(file_U, "\t%f", m_U[i][j]);
+  //     fprintf(file_U, "\n");
+  //   }
+  //   fclose(file_U);
+  // }
 
   // sprintf(name, "%s/final-V.dat", directory);
   // FILE * file_V = fopen(name, "w");
