@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <stdio.h>
+#include<stdlib.h> 
 #include "data.h"
+
 
 c_data::c_data() {
 }
