@@ -827,7 +827,7 @@ double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v,
                             gsl_vector* gamma, gsl_matrix* word_ss, 
                             bool update_word_ss) {
 
-  double pseudo_count = 0.001;
+  double pseudo_count = 0.1;
   double likelihood = 0;
   gsl_vector* log_theta_v = gsl_vector_alloc(theta_v->size);
   gsl_vector_memcpy(log_theta_v, theta_v);
