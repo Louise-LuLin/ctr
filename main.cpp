@@ -120,12 +120,16 @@ int main(int argc, char* argv[]) {
     printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
     std::vector<std::string> test_path; 
     std::stringstream test;
+    string userId_path;
+    string itemId_path;
 
     if (crossV == 1) {
       directory = prefix + "/output/" + source + "/byUser_20k_review";
-      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_false_0.txt";
-      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_false_0.txt";
+      user_path = prefix + "/" + source + "/byUser_20k_review/CTR/user_false.txt";
+      item_path = prefix + "/" + source + "/byUser_20k_review/CTR/item_false.txt";
       mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false.txt";
+      userId_path = prefix + "/" + source + "/byUser_20k_review/CTR/userID_false.txt";
+      itemId_path = prefix + "/" + source + "/byUser_20k_review/CTR/itemID_false.txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
@@ -227,12 +231,16 @@ int main(int argc, char* argv[]) {
     printf("reading user matrix from %s ...\n", user_path.c_str());
     c_data* users = new c_data(); 
     users->read_data(user_path.c_str());
+    if(crossV == 1)
+      users->read_ids(userId_path.c_str());
     int num_users = (int)users->m_vec_data.size();
 
     // read items
     printf("reading item matrix from %s ...\n", item_path.c_str());
     c_data* items = new c_data(); 
     items->read_data(item_path.c_str());
+    if(crossV == 1)
+      items->read_ids(itemId_path.c_str());
     int num_items = (int)items->m_vec_data.size();
 
     // create model instance
@@ -294,6 +302,11 @@ int main(int argc, char* argv[]) {
     var = sqrt(var/crossV);
 
     printf("[Stat]Part %d Perplexity: %f+/-%f\n", i, mean, var);
+
+    // char name[500];
+    // sprintf(name, "./output/%s_%d_%s_CTR_%d.output", source.c_str(), crossV, cold.c_str(), num_factors);
+    // FILE* file = fopen(name, "a+");
+    // fprintf("[Stat]Part %d Perplexity: %f+/-%f\n", i, mean, var);
   }
 
 }

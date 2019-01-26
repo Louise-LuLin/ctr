@@ -12,6 +12,7 @@ c_data::~c_data() {
   }
   m_vec_data.clear();
   m_vec_len.clear();
+  m_vec_ids.clear();
 }
 
 void c_data::read_data(const char * data_filename, int OFFSET) {
@@ -36,5 +37,21 @@ void c_data::read_data(const char * data_filename, int OFFSET) {
   }
   fclose(fileptr);
   printf("read %d vectors with %d entries ...\n", (int)m_vec_len.size(), total);
+}
+
+void c_data::read_ids(const char * data_filename) {
+
+  int index=0;
+
+  FILE * fileptr;
+  fileptr = fopen(data_filename, "r");
+
+  while ((fscanf(fileptr, "%10d", &index) != EOF)) {
+    char* id;
+    fscanf(fileptr, "%s", &id);
+    m_vec_ids.push_back(id);
+  }
+  fclose(fileptr);
+  printf("read %d ids ...\n", (int)m_vec_ids.size());
 }
 

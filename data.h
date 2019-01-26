@@ -17,9 +17,11 @@ public:
   c_data();
   ~c_data();
   void read_data(const char * data_filename, int OFFSET=0);
+  void read_ids(const char * data_filename);
 public:
   vector<int*> m_vec_data;
   vector<int> m_vec_len;
+  vector<char*> m_vec_ids;
 };
 
 #endif // DATA_H
