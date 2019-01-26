@@ -283,13 +283,13 @@ int main(int argc, char* argv[]) {
     for (int j = 0; j < perp.size(); j++) {
       mean += *(perp[j]+i);
     }
-    if(perp.size > 0)
+    if(perp.size() > 0)
       mean = mean/perp.size();
 
     for (int j = 0; j < perp.size(); j++) {
       var += (*(perp[j]+i) - mean) * (*(perp[j]+i) - mean);
     }
-    if(perp.size > 0)
+    if(perp.size() > 0)
       var = sqrt(var/perp.size());
 
     printf("[Stat]Part %d Perplexity: %f+/-%f\n", i, mean, var);
