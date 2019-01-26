@@ -143,11 +143,11 @@ int main(int argc, char* argv[]) {
       if (strcmp(cold.c_str(), "true") == 0) {
         for (int j = 0; j < 3; j++) {
           test = prefix + "/" + source + "/byUser_20k_review/CTR/test_" + cold + "_" + std::to_string(cv_i) + "_" + std::to_string(j) + ".txt";
-          test_path.push_back(test.str()); 
+          test_path.push_back(test); 
         }
       } else {
         test = prefix + "/" + source + "/byUser_20k_review/CTR/test_" + cold + "_" + std::to_string(cv_i) + ".txt";
-        test_path.push_back(test.str()); 
+        test_path.push_back(test); 
       }
     }
     
