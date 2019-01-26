@@ -260,8 +260,8 @@ int main(int argc, char* argv[]) {
 
       for (int j = 0; j < test_path.size(); j++) {
         printf("==== part %d in %d ====\n", j, test_path.size());
-        c_corpus* tmp_c = new c_corpus();
-        tmp_c->read_data(test_path[j].c_str());
+        c_corpus* test_c = new c_corpus();
+        test_c->read_data(test_path[j].c_str());
 
         double fold_perp = ctr->test_map_estimate(users, items, test_c, &ctr_param);
         perp[cv_i][j] = fold_perp;
