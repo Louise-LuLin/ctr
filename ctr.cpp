@@ -705,8 +705,8 @@ double c_ctr::test_map_estimate(const c_data* users, const c_data* items,
   if (param->ctr_run && param->theta_opt) {
     int max_len = test_c->max_corpus_length();
     phi = gsl_matrix_calloc(max_len, m_num_factors);
-    word_ss = gsl_matrix_calloc(m_num_factors, c->m_size_vocab);
-    log_beta = gsl_matrix_calloc(m_num_factors, c->m_size_vocab);
+    word_ss = gsl_matrix_calloc(m_num_factors, test_c->m_size_vocab);
+    log_beta = gsl_matrix_calloc(m_num_factors, test_c->m_size_vocab);
     gsl_matrix_memcpy(log_beta, m_beta);
     mtx_log(log_beta);
     gamma = gsl_vector_alloc(m_num_factors);
