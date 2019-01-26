@@ -114,7 +114,8 @@ int main(int argc, char* argv[]) {
     ++i;
   };
 
-  std::vector<double> perp;
+  std::vector<double*> perp;
+  double* fold_perp;
   for (int cv_i = 0; cv_i < crossV; cv_i++) {
     /// print information
     printf("\n******************** Fold %d in %d, %s coldstart ******************\n", cv_i, crossV, cold.c_str());
@@ -255,7 +256,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (learning_rate <= 0) {
-      ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
+      fold_perp = ctr->learn_map_estimate(users, items, c, test_c, &ctr_param, directory.c_str());
+      perp.push_back(fold_perp);
     } else {
       ctr->stochastic_learn_map_estimate(users, items, c, &ctr_param, directory.c_str());
     }
@@ -269,5 +271,28 @@ int main(int argc, char* argv[]) {
     
   }
 
+  int test_num = 1;
+  if (strcmp(cold.c_str(), "true") == 0) {
+    test_num = 3;
+  }
+  double mean = 0;
+  double var = 0;
+  for (int i = 0; i < test_num; i++) {
+    mean = 0;
+    var = 0;
+    for (int j = 0; j < perp.size(); j++) {
+      mean += *(perp[j]+i);
+    }
+    if(perp.size > 0)
+      mean = mean/perp.size();
+
+    for (int j = 0; j < perp.size(); j++) {
+      var += (*(perp[j]+i) - mean) * (*(perp[j]+i) - mean);
+    }
+    if(perp.size > 0)
+      var = sqrt(var/perp.size());
+
+    printf("[Stat]Part %d Perplexity: %f+/-%f\n", i, mean, var);
+  }
 
 }

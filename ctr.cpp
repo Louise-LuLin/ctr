@@ -394,7 +394,7 @@ void c_ctr::stochastic_learn_map_estimate(const c_data* users, const c_data* ite
   }
 }
 
-double c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
+double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items, 
                                const c_corpus* c, const vector <c_corpus*> test_c,
                                const ctr_hyperparameter* param,
                                const char* directory) {
@@ -655,6 +655,8 @@ double c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   // }
 
   //test
+  static double test_perp[test_c.size()];
+  double tmp_perp = 0;
   for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
     printf("==== part %d in %d ====\n", test_idx, test_c.size());
     likelihood = -exp(50);
@@ -796,15 +798,18 @@ double c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
       iter++;
       converge = fabs((likelihood-likelihood_old)/likelihood_old);
+      tmp_perp = exp(-likelihood/c->m_num_total_words);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
       // fprintf(file, "%04d %06d %10.5f %.10f\n", iter, elapsed, likelihood, converge);
       // fflush(file);
       printf("iter=%04d, time=%06d, likelihood=%.5f, converge=%.10f, perplexity=%.5f\n", 
-        iter, elapsed, likelihood, converge, exp(-likelihood/c->m_num_total_words));
+        iter, elapsed, likelihood, converge, tmp_perp);
+
 
     }
+    test_perp[test_idx] = tmp_perp;
   }
 
   // free memory
@@ -819,6 +824,8 @@ double c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     gsl_matrix_free(word_ss);
     gsl_vector_free(gamma);
   }
+
+  return test_perp;
 }
 
 double c_ctr::doc_inference(const c_document* doc, const gsl_vector* theta_v, 
