@@ -655,8 +655,7 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   // }
 
   //test
-  const int test_num = test_c.size();
-  static double test_perp[test_num];
+  static double test_perp[3];
   double tmp_perp = 0;
   for (int test_idx = 0; test_idx < test_c.size(); test_idx++) {
     printf("==== part %d in %d ====\n", test_idx, test_c.size());
