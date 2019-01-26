@@ -792,7 +792,7 @@ double * c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
       iter++;
       converge = fabs((likelihood-likelihood_old)/likelihood_old);
-      tmp_perp = exp(-likelihood/c->m_num_total_words);
+      tmp_perp = exp(-likelihood/test_c[test_idx]->m_num_total_words);
 
       if (likelihood < likelihood_old) printf("likelihood is decreasing!\n");
 
