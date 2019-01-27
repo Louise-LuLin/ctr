@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include "ctr.h"
 
 using namespace std; 

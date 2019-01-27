@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include<stdlib.h> 
 #include "data.h"
+#include "string.h"
+#include <string>
+#include <iostream>
 
 
 c_data::c_data() {
@@ -44,20 +47,18 @@ void c_data::read_data(const char * data_filename, int OFFSET) {
 void c_data::read_ids(const char * data_filename) {
 
   int index=0;
+  std::string id;
+  std::string line;
 
-  FILE * fileptr;
-  printf("point 0\n");
-  fileptr = fopen(data_filename, "r");
-  printf("point 1\n");
+  std::fstream in;
+  in.open(data_filename);
 
-  while ((fscanf(fileptr, "%10d", &index) != EOF)) {
-    char* id;
-    printf("point 2\n");
-    fscanf(fileptr, "%s", &id);
-    m_vec_ids.push_back(id);
-    printf("%s\n", id);
+  while (std::getline(in, line)) {
+    std::stringstream ss(line);
+    ss >> index >> id;
+    m_vec_ids.push_back(id.c_str());
   }
-  fclose(fileptr);
+  in.close();
   printf("read %d ids ...\n", (int)m_vec_ids.size());
 }
 
