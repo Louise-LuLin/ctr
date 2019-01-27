@@ -47,7 +47,7 @@ void c_corpus::read_data(const char * data_filename, int OFFSET) {
   }
   fclose(fileptr);
   m_num_docs = nd;
-  m_size_vocab = nw;
+  m_size_vocab = 5000;
   printf("number of docs  : %d\n", nd);
   printf("number of terms : %d\n", nw);
   printf("number of total words : %d\n", m_num_total_words);
