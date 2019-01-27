@@ -46,10 +46,13 @@ void c_data::read_ids(const char * data_filename) {
   int index=0;
 
   FILE * fileptr;
+  printf("point 0\n");
   fileptr = fopen(data_filename, "r");
+  printf("point 1\n");
 
   while ((fscanf(fileptr, "%10d", &index) != EOF)) {
     char* id;
+    printf("point 2\n");
     fscanf(fileptr, "%s", &id);
     m_vec_ids.push_back(id);
     printf("%s\n", id);
