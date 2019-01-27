@@ -619,7 +619,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
   // save final results
   printf("directory: %s\n", directory);
   if (strcmp(directory, "")!=0) {
-    sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
+    sprintf(name, "%s/CTR_userEmbed_%d.txt", directory, m_num_factors);
     FILE * file_U = fopen(name, "w");
     fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
     printf("%d\t%d\n", m_num_users, m_num_factors);
@@ -726,7 +726,7 @@ double c_ctr::test_map_estimate(const c_data* users, const c_data* items,
   static double test_perp[3];
   double tmp_perp = 0;
 
-  while (iter < 10) {
+  while (iter < param->inf_iter) {
     likelihood_old = likelihood;
     likelihood = 0.0;
 

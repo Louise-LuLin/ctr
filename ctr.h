@@ -16,6 +16,7 @@ struct ctr_hyperparameter {
   double alpha_smooth;
   int    random_seed;
   int    max_iter;
+  int    inf_iter;
   int    save_lag;
   int    theta_opt;
   int    ctr_run;
@@ -24,13 +25,14 @@ struct ctr_hyperparameter {
   void set(double aa, double bb, 
            double lu, double lv, 
            double lr, double as,
-           int rs, int mi, int sl,    
+           int rs, int mi, int inf, int sl,    
            int to, int cr, int lda_r) {
     a = aa; b = bb; 
     lambda_u = lu; lambda_v = lv; 
     learning_rate = lr;
     alpha_smooth = as;
     random_seed = rs; max_iter = mi;
+    inf_iter = inf;
     save_lag = sl; theta_opt = to;
     ctr_run = cr; lda_regression = lda_r;
   }
@@ -45,6 +47,7 @@ struct ctr_hyperparameter {
     fprintf(file, "alpha_smooth = %.6f\n", alpha_smooth);
     fprintf(file, "random seed = %d\n", (int)random_seed);
     fprintf(file, "max iter = %d\n", max_iter);
+    fprintf(file, "inf iter = %d\n", inf_iter);
     fprintf(file, "save lag = %d\n", save_lag);
     fprintf(file, "theta opt = %d\n", theta_opt);
     fprintf(file, "ctr run = %d\n", ctr_run);

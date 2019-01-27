@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
   long   random_seed = (long) t;
   int    save_lag = 20;
   int    max_iter = 30;
+  int    inf_iter = 20;
 
   int    num_factors = 200;
   int    crossV = 1;
@@ -96,6 +97,9 @@ int main(int argc, char* argv[]) {
     } else if (strcmp(argv[i], "-iter") == 0){
       max_iter = atoi(argv[++i]);
       fprintf(stdout, "+ iter = %d\n", max_iter);
+    } else if (strcmp(argv[i], "-infIter") == 0){
+      inf_iter = atoi(argv[++i]);
+      fprintf(stdout, "+ inference iter = %d\n", inf_iter);
     } else if (strcmp(argv[i], "-crossV") == 0) {
       crossV = atoi(argv[++i]);
       fprintf(stdout, "+ crossV = %d\n", crossV);
@@ -178,6 +182,7 @@ int main(int argc, char* argv[]) {
     printf("random seed: %d\n", (int)random_seed);
     printf("save lag: %d\n", save_lag);
     printf("max iter: %d\n", max_iter);
+    printf("inf iter: %d\n", inf_iter);
     printf("number of factors: %d\n", num_factors);
 
     if (mult_path != "") {
@@ -221,7 +226,7 @@ int main(int argc, char* argv[]) {
     if (mult_path == "") ctr_run = 0;
     ctr_hyperparameter ctr_param;
     ctr_param.set(a, b, lambda_u, lambda_v, learning_rate, alpha_smooth,
-        random_seed, max_iter, save_lag, theta_opt, ctr_run, lda_regression);
+        random_seed, max_iter, inf_iter, save_lag, theta_opt, ctr_run, lda_regression);
     // sprintf(filename, "%s/settings.txt", directory); 
     // ctr_param.save(filename);
     
