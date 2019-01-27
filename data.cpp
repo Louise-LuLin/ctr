@@ -5,6 +5,8 @@
 #include "string.h"
 #include <string>
 #include <iostream>
+#include <fstream>
+#include "sstream"
 
 
 c_data::c_data() {
