@@ -618,7 +618,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
 
   // save final results
   printf("directory: %s\n", directory);
-  if (!strcmp(directory, "")) {
+  if (strcmp(directory, "")!=0) {
     sprintf(name, "%s/CTR_userEmbed_%d.dat", directory, m_num_factors);
     FILE * file_U = fopen(name, "w");
     fprintf(file_U, "%d\t%d\n", m_num_users, m_num_factors);
