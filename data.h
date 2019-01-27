@@ -9,6 +9,8 @@
 #define DATA_H
 
 #include <vector>
+#include "string.h"
+#include <string>
 
 using namespace std;
 
@@ -21,7 +23,7 @@ public:
 public:
   vector<int*> m_vec_data;
   vector<int> m_vec_len;
-  vector<char*> m_vec_ids;
+  vector<string> m_vec_ids;
 };
 
 #endif // DATA_H

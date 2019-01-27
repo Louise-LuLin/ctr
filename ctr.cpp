@@ -624,8 +624,8 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     printf("%d\t%d\n", m_num_users, m_num_factors);
     for (i = 0; i < m_num_users; i++)
     {
-      printf("%s\n", users->m_vec_ids[i]);
-      printf("%s\n", users->m_vec_ids[i]);
+      printf("%s\n", users->m_vec_ids[i].c_str());
+      printf("%s\n", users->m_vec_ids[i].c_str());
       fprintf(file_U, "%s", users->m_vec_ids[i]);
       for (j = 0; j < m_num_factors; j++)
         fprintf(file_U, "\t%f", gsl_matrix_get(m_U, i, j));
