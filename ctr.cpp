@@ -635,13 +635,13 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     sprintf(name, "%s/CTR_theta_dim_%d.txt", directory, m_num_factors);
     FILE * file_V = fopen(name, "w");
     fprintf(file_V, "%d\t%d\n", (int)(items->m_map_ids).size(), m_num_factors);
-    printf("%d\t%d\n", (int)(items->m_map_ids).size(), m_num_factor);
+    printf("%d\t%d\n", (int)(items->m_map_ids).size(), m_num_factors);
     for (i = 0; i < m_num_items; i++)
     {
       if (items->m_map_ids.find(items->m_vec_ids[i]) == items->m_map_ids.end()) {
         continue;
       }
-      
+
       fprintf(file_V, "%s", items->m_vec_ids[i].c_str());
       for (j = 0; j < m_num_factors; j++)
         fprintf(file_V, "\t%f", gsl_matrix_get(m_V, i, j));

@@ -3,6 +3,7 @@
 #include<stdlib.h> 
 #include "data.h"
 #include "string.h"
+#include "map"
 #include <string>
 #include <iostream>
 #include <fstream>
