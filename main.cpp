@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) {
     string test;
     string userId_path;
     string itemId_path;
+    string seletecItem_path;
 
     if (crossV == 1) {
       directory = prefix + "/output/" + source + "/byUser_20k_review";
@@ -135,6 +136,10 @@ int main(int argc, char* argv[]) {
       mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false.txt";
       userId_path = prefix + "/" + source + "/byUser_20k_review/CTR/userID_false.txt";
       itemId_path = prefix + "/" + source + "/byUser_20k_review/CTR/itemID_false.txt";
+      if (strcmp(source.c_str(), "StackOverflow2") == 0) {
+        seletecItem_path = prefix + "/" + source + "/byUser_20k_review/StackOverflow2SelectedQuestions.txt";
+        mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/train_false.txt";
+      }
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
@@ -247,6 +252,8 @@ int main(int argc, char* argv[]) {
     items->read_data(item_path.c_str());
     if(crossV == 1)
       items->read_ids(itemId_path.c_str());
+    if (strcmp(source.c_str(), "StackOverflow2") == 0)
+      items->read_selectIds(seletecItem_path.c_Str());
     int num_items = (int)items->m_vec_data.size();
 
     // create model instance

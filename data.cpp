@@ -64,3 +64,19 @@ void c_data::read_ids(const char * data_filename) {
   printf("read %d ids ...\n", (int)m_vec_ids.size());
 }
 
+void read_selectIds(const char * data_filename) {
+  std::fstream in;
+  std::string line;
+  std::string iid;
+  std::string uid;
+  in.open(data_filename);
+  while (std::getline(in, line))
+  {
+    std::stringstream ss(line);
+    ss >> uid >> iid;
+    m_map_ids[iid] = uid;
+  }
+  in.close();
+  printf("read %d selected ids ...\n", (int)m_map_ids.size());  
+}
+
