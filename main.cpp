@@ -253,7 +253,7 @@ int main(int argc, char* argv[]) {
     if(crossV == 1)
       items->read_ids(itemId_path.c_str());
     if (strcmp(source.c_str(), "StackOverflow2") == 0)
-      items->read_selectIds(seletecItem_path.c_Str());
+      items->read_selectIds(seletecItem_path.c_str());
     int num_items = (int)items->m_vec_data.size();
 
     // create model instance

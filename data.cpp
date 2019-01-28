@@ -21,6 +21,7 @@ c_data::~c_data() {
   m_vec_data.clear();
   m_vec_len.clear();
   m_vec_ids.clear();
+  m_map_ids.clear();
 }
 
 void c_data::read_data(const char * data_filename, int OFFSET) {
