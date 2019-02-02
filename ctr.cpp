@@ -644,8 +644,9 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
       for (j = 0; j < m_num_factors; j++)
         fprintf(file_V, "\t%f", gsl_matrix_get(m_V, items->m_r_ids.at(iter->second), j));
       fprintf(file_V, "\n");
+      iter++;
     }
-
+    fclose(file_V);
     // for (i = 0; i < m_num_items; i++)
     // {
     //   if (items->m_map_ids.find(items->m_vec_ids[i]) == items->m_map_ids.end()) {
