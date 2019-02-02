@@ -26,6 +26,7 @@ public:
   vector<int*> m_vec_data;
   vector<int> m_vec_len;
   vector<string> m_vec_ids;
+  map<string, int> m_r_ids;
   map<string, string> m_map_ids;
 };
 

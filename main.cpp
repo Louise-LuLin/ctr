@@ -136,10 +136,9 @@ int main(int argc, char* argv[]) {
       mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/corpus_false.txt";
       userId_path = prefix + "/" + source + "/byUser_20k_review/CTR/userID_false.txt";
       itemId_path = prefix + "/" + source + "/byUser_20k_review/CTR/itemID_false.txt";
-      if (strcmp(source.c_str(), "StackOverflow2") == 0) {
-        seletecItem_path = prefix + "/" + source + "/byUser_20k_review/StackOverflow2SelectedQuestions.txt";
-        mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/train_false.txt";
-      }
+      // seletecItem_path = prefix + "/" + source + "/byUser_20k_review/" + source + "SelectedQuestions.txt";
+      seletecItem_path = prefix + "/" + source + "/byUser_20k_review/CTR/localIndex_false.txt";
+      mult_path = prefix + "/" + source + "/byUser_20k_review/CTR/train_false.txt";
       theta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".doc.states";
       beta_init_path = prefix + "/" + source + "/byUser_20k_review/CTR/" + std::to_string(num_factors) + ".topics";
     } else {
