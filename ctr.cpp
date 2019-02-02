@@ -637,7 +637,7 @@ void c_ctr::learn_map_estimate(const c_data* users, const c_data* items,
     fprintf(file_V, "%d\t%d\n", (int)(items->m_map_ids).size(), m_num_factors);
     printf("%d\t%d\n", (int)(items->m_map_ids).size(), m_num_factors);
 
-    const std::map<std::string, std::string>::iterator iter;
+    std::map<std::string, std::string>::const_iterator iter;
     iter = items->m_map_ids.begin();
     while (iter != items->m_map_ids.end()) {
       fprintf(file_V, "%s", iter->first.c_str());
