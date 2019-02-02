@@ -61,7 +61,7 @@ void c_data::read_ids(const char * data_filename) {
     std::stringstream ss(line);
     ss >> index >> id;
     m_vec_ids.push_back(id);
-    m_r_ids[id] = std::stoi(index);
+    m_r_ids[id] = index;
   }
   in.close();
   printf("read %d ids ...\n", (int)m_vec_ids.size());
